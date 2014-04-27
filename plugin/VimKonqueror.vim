@@ -1,6 +1,6 @@
 " autocmd BufWritePost <buffer> source %
 
-autocmd FileType markdown autocmd BufWritePost <buffer> call VimPandocRefresh()
+autocmd FileType pandoc autocmd BufWritePost <buffer> call VimPandocRefresh()
 
 let s:path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 

@@ -27,12 +27,11 @@ function! VimPandocRefresh()
         if resolve(VimKonquerorCurrentUrl(dest)) != "file:" . aa
             call VimKonquerorOpen(dest, aa)
         endif
-        let html64 = system("pandoc " . expand('%') . " -t " . s:path . "/sample.lua | base64 -w0")
+        let html64 = system("pandoc " . expand('%') . " -t " . s:path . "/html_dot.lua | base64 -w0")
         call VimKonquerorExecuteJS(dest, "setOutput(\"" . html64 . "\")")
     catch
     endtry
 endfunction
-
 
 function! VimKonquerorExecuteJS(dest, js)
     let num = VimKonquerorFindWidget(a:dest)

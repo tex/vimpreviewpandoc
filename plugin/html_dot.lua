@@ -198,6 +198,10 @@ function HorizontalRule()
   return "<hr/>"
 end
 
+function Cite(s)
+    return s
+end
+
 function CodeBlock(s, attr)
   -- If code block has class 'dot', pipe the contents through dot
   -- and base64, and include the base64-encoded png as a data: URL.

@@ -4,11 +4,11 @@
 -- are piped through graphviz and images are included in the HTML
 -- output using 'data:' URLs.
 --
--- Invoke with: pandoc -t sample.lua
+-- Invoke with: pandoc -t html_dot.lua
 --
 -- Note:  you need not have lua installed on your system to use this
 -- custom writer.  However, if you do have lua installed, you can
--- use it to test changes to the script.  'lua sample.lua' will
+-- use it to test changes to the script.  'lua html_dot.lua' will
 -- produce informative error messages if your code contains
 -- syntax errors.
 
@@ -74,12 +74,6 @@ function Doc(body, metadata, variables)
   local function add(s)
     table.insert(buffer, s)
   end
-  add('<!DOCTYPE html>')
-  add('<html>')
-  add('<head>')
-  add('<title>' .. (metadata['title'] or '') .. '</title>')
-  add('</head>')
-  add('<body>')
   if metadata['title'] and metadata['title'] ~= "" then
     add('<h1 class="title">' .. metadata['title'] .. '</h1>')
   end
@@ -97,8 +91,6 @@ function Doc(body, metadata, variables)
     end
     add('</ol>')
   end
-  add('</body>')
-  add('</html>')
   return table.concat(buffer,'\n')
 end
 

@@ -8,7 +8,7 @@ function! VimKonqPandoc()
         if resolve(s:VimKonqPandoc_CurrentUrl(dest)) != "file:" . curr
             call s:VimKonqPandoc_OpenUrl(dest, curr)
         endif
-        let html64 = system("pandoc " . expand('%') . " -t " . s:path . "/html_dot.lua | base64 -w0")
+        let html64 = system("cd " . fnamemodify(expand('%'), ':h') . "; pandoc " . fnamemodify(expand('%'), ':t') . " -t " . s:path . "/html_dot.lua | base64 -w0")
         call s:VimKonqPandoc_EvalJS(dest, "setOutput(\"" . html64 . "\")")
 endfunction
 

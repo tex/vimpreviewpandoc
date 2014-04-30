@@ -44,19 +44,6 @@ local function attributes(attr)
   return table.concat(attr_table)
 end
 
--- Run cmd on a temporary file containing inp and return result.
-local function pipe(cmd, inp)
-  local tmp = os.tmpname()
-  local tmph = io.open(tmp, "w")
-  tmph:write(inp)
-  tmph:close()
-  local outh = io.popen(cmd .. " " .. tmp,"r")
-  local result = outh:read("*all")
-  outh:close()
-  os.remove(tmp)
-  return result
-end
-
 -- Table to store footnotes, so they can be included at the end.
 local notes = {}
 
@@ -202,12 +189,41 @@ function Cite(s)
     return s
 end
 
+function system(cmd)
+    local outh = io.popen(cmd, "r")
+    local result = outh:read("*all")
+    outh:close()
+    return result
+end
+
+function CaptionedImage(src, tit, text)
+  local outh = io.popen("realpath " .. src, "r")
+  local result = outh:read("*all")
+  outh:close()
+  return '<img src="'..result..'" alt="'..tit..', '..text..'"></img>'
+end
+
+-- Run cmd on a temporary file containing inp and return result.
+local function onTmpFile(inp, fun)
+  local tmp = os.tmpname()
+  local tmph = io.open(tmp, "w")
+  tmph:write(inp)
+  tmph:close()
+  fun(tmp)
+  os.remove(tmp)
+end
+
 function CodeBlock(s, attr)
   -- If code block has class 'dot', pipe the contents through dot
-  -- and base64, and include the base64-encoded png as a data: URL.
   if attr.class and string.match(' ' .. attr.class .. ' ',' dot ') then
-    local png = pipe("base64", pipe("dot -Tpng", s))
-    return '<img src="data:image/png;base64,' .. png .. '"/>'
+    system("mkdir -p .dot")
+    local out
+    onTmpFile(s, function(name)
+        local hash = system("sha256sum "..name)
+        out = string.sub(hash, 0, 20)
+        system("dot -Tpng " .. " -o.dot/".. out .. " " ..name)
+    end)
+    return CaptionedImage('.dot/' .. out, '', '')
   -- otherwise treat as code (one could pipe through a highlighter)
   else
     return "<pre><code" .. attributes(attr) .. ">" .. escape(s) ..

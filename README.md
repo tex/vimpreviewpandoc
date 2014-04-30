@@ -10,6 +10,8 @@ Konqueror always shows changed area so you don't need to scroll manually.
 Place your VIM on one side of your screen and Konqueror on the other side to get
 productive environment.
 
+![Screenshot](screen-1.png)
+
 ## Dependencies
 
  - pandoc

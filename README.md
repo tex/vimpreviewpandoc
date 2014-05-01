@@ -1,14 +1,19 @@
-# VimKonqPandoc
+# VimPreviewPandoc
 
 ## Introduction
 
-VimKonqPandoc is VIM plugin that helps with editing MarkDown-like documents.
+VimPreviewPandoc is VIM plugin that helps with editing MarkDown-like documents.
 
-Edit you MarkDown-like documents in VIM and see a nice HTML-based output in Konqueror.
-Konqueror always shows changed area so you don't need to scroll manually.
+Edit you MarkDown-like documents in VIM and see a nice HTML-based output in Konqueror or Firefox.
+The web browser always shows changed area so you don't need to scroll manually.
 
-Place your VIM on one side of your screen and Konqueror on the other side to get
+Add `let g:vimkonqpandoc = 1` to your `.vimrc` to set Konqueror as previewer.
+Add `let g:vimfirepandoc = 1` to your `.vimrc` to set Firefox as previewer.
+
+Place your VIM on one side of your screen and web browser on the other side to get
 productive environment.
+
+The Konqueror shows automatically correct preview, when using Firefox you have to manually open `static/index.html` for first time.
 
 ![Screenshot](screen-1.png)
 
@@ -16,8 +21,17 @@ productive environment.
 
  - pandoc
  - base64
+
+### Konqueror
+
  - dbus-send
  - konqueror
+
+### Firefox
+
+ - Firefox
+ - Remote Control extension (https://addons.mozilla.org/en-US/firefox/addon/remote-control/)
+ - VIM with Python support
 
 Please, note that there cannot be a `-` character anywhere in the path to this plugin.
 Please, note that all characters in path to this plugin must be lowercase.
@@ -32,12 +46,20 @@ We use a custom writer feature of `pandoc`(*1.12.3.3*) which incorrectly parses 
 
     custom writer to create a graphviz graphs from `dot` code blocks
 
- - base64 to encode pandoc output to be passable through DBUS
- - `DBUS` to control Konqueror
-    - open `static/index.html` if not already opened
-    - pass `pandoc` output to the Konqueror using `DBUS` call `org.kde.KHTMLPart.evalJS`
+ - base64 to encode pandoc output
 
-        evaluate JavaScript function `setOutput(html)` where html is `base64` encoded output from `pandoc`
+    - Konqueror
+
+        - `DBUS` to control Konqueror
+        - open `static/index.html` if not already opened
+        - pass `pandoc` output to the Konqueror using `DBUS` call `org.kde.KHTMLPart.evalJS`
+
+    - Firefox
+
+        - `Remote Control` extension to control Firefox
+        - pass `pandoc` output to the Firefox using `Remote Control` (TCP socket, default parameters)
+
+        both browsers evaluate JavaScript function `setOutput(html)` where html is `base64` encoded output from `pandoc`
 
  - index.html is almost empty page with one `div` and `setOutput(html)` function
 

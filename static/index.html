@@ -48,6 +48,8 @@
     table { border-collapse: collapse; border-spacing: 0; }
     td, th { vertical-align: top; padding: 4px 10px; border: 1px solid #bbb; }
     tr:nth-child(even) td, tr:nth-child(even) th { background: #eee; }
+
+    .new { background-color: yellow; }
   </style>
 </head>
 <body>
@@ -77,6 +79,8 @@
               // element with offsetTop property.
           }
           window.scrollTo(0,allnew[i].offsetTop - window.outerHeight / 3);
+          allnew[i].className = "new";
+          setTimeout(function() {allnew[i].className = "";}, 2000);
           return;
         }
       }

@@ -1,17 +1,36 @@
 if exists( "g:vimkonqpandoc" )
   autocmd FileType pandoc autocmd BufWritePost <buffer> call VimKonqPandoc()
+  autocmd FileType pandoc autocmd CursorHold,CursorHoldI <buffer> call VimKonqPandoc()
+  autocmd FileType pandoc autocmd TextChanged,TextChangedI <buffer> call VimKonqChanged()
 endif
 
 let s:path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 
+let b:vimkonqpandoc_update = 0
+
+function! VimKonqChanged()
+    let b:vimkonqpandoc_update = 1
+endfunction
+
 function! VimKonqPandoc()
-    let curr = s:IndexHtml()
-    let dest = s:KonqFindDest()
-    if resolve(s:KonqCurrentUrl(dest)) != "file:" . curr
-        call s:KonqOpenUrl(dest, curr)
+    if b:vimkonqpandoc_update == 1
+        try
+            let curr = s:IndexHtml()
+            let dest = s:KonqFindDest()
+            if resolve(s:KonqCurrentUrl(dest)) != "file:" . curr
+                call s:KonqOpenUrl(dest, curr)
+            endif
+            let html64 = system("pandoc -t " . s:path . "/html_dot.lua | base64 -w0", GetBufContent())
+            call s:KonqEvalJS(dest, "setOutput(\"" . html64 . "\")")
+        catch
+        endtry
+        let b:vimkonqpandoc_update = 0
     endif
-    let html64 = system("cd " . fnamemodify(expand('%'), ':h') . "; pandoc " . fnamemodify(expand('%'), ':t') . " -t " . s:path . "/html_dot.lua | base64 -w0")
-    call s:KonqEvalJS(dest, "setOutput(\"" . html64 . "\")")
+endfunction
+
+function! GetBufContent()
+    let bufnr = expand('<bufnr>')
+    return join(getbufline(bufnr, 1, "$"),"\n")
 endfunction
 
 function! s:IndexHtml()

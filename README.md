@@ -19,13 +19,14 @@ The Konqueror shows automatically correct preview, when using Firefox you have t
 
 ## Dependencies
 
- - pandoc
+ - pandoc *1.12.3.3*
  - base64
+ - realpath
 
 ### Konqueror
 
  - dbus-send
- - konqueror
+ - konqueror *4.13.0*
 
 ### Firefox
 

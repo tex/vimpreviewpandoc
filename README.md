@@ -21,7 +21,9 @@ The Konqueror shows automatically correct preview, when using Firefox you have t
 
  - pandoc *1.12.3.3*
  - base64
- - realpath
+ - python2
+ - pandocfilters [https://github.com/jgm/pandocfilters]()
+ - pygraphviz [https://github.com/pygraphviz/pygraphviz]()
 
 ### Konqueror
 
@@ -34,18 +36,14 @@ The Konqueror shows automatically correct preview, when using Firefox you have t
  - Remote Control extension (https://addons.mozilla.org/en-US/firefox/addon/remote-control/)
  - VIM with Python support
 
-Please, note that there cannot be a `-` character anywhere in the path to this plugin.
-Please, note that all characters in path to this plugin must be lowercase.
-
-We use a custom writer feature of `pandoc`(*1.12.3.3*) which incorrectly parses it's input parameters and incorrectly recognizes the `-` character there as beginning of a parameter. It also incorrectly changes the path to lowercase.
-
 ## Theory of operation
 
  `BufWritePost` event executes following:
 
  - `pandoc` to convert MarkDown document to HTML
 
-    custom writer to create a graphviz graphs from `dot` code blocks
+    - custom filter to create a graphviz graphs from `dot` code blocks
+    - custom filter to replace relative paths to images to absolute paths
 
  - base64 to encode pandoc output
 

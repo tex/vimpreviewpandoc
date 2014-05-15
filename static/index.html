@@ -49,43 +49,54 @@
     td, th { vertical-align: top; padding: 4px 10px; border: 1px solid #bbb; }
     tr:nth-child(even) td, tr:nth-child(even) th { background: #eee; }
 
-    .new { background-color: yellow; }
+    ins { text-decoration: none; background-color: yellow; }
+    del { text-decoration: none; background-color: red; }
   </style>
-</head>
-<body>
 
-  <div id=out />
+  <script src="./htmldiff.js"></script>
 
   <script>
+    var last_html = undefined;
 
     function setOutput(val){
-      var out = document.getElementById('out');
-      var old = out.cloneNode(true);
-      out.innerHTML = atob(val);
+      var html = atob(val);
 
-      var allold = old.getElementsByTagName("*");
-      if (allold === undefined) {
-        return;
+      if (last_html === undefined) {
+          last_html = html;
       }
-      var allnew = out.getElementsByTagName("*");
-      if (allnew === undefined) {
-        return;
+
+      var out = document.getElementById('out');
+      out.innerHTML = this.htmldiff(last_html, html);
+
+      last_html = html;
+
+      var min = undefined;
+      var ins = document.getElementsByTagName('ins');
+      var del = document.getElementsByTagName('del');
+      for (var i = 0; i < ins.length; i++) {
+          min = min === undefined || min > ins[i].offsetTop ? ins[i].offsetTop : min;
       }
-      for (var i = 0, max = Math.min(allold.length, allnew.length); i < max; i++) {
-        if ((allold[i].nodeName != allnew[i].nodeName) ||
-            (allold[i].innerHTML != allnew[i].innerHTML)) {
-          for (; i >= 0 && allnew[i].offsetTop == undefined; i--) {
-              // SVG has not offsetTop property, get the nearest upper
-              // element with offsetTop property.
-          }
-          window.scrollTo(0,allnew[i].offsetTop - window.outerHeight / 3);
-          allnew[i].className = "new";
-          setTimeout(function() {allnew[i].className = "";}, 2000);
-          return;
+      for (var i = 0; i < del.length; i++) {
+          min = min === undefined || min > del[i].offsetTop ? del[i].offsetTop : min;
+      }
+
+      window.scrollTo(0,min - window.outerHeight / 3);
+
+      setTimeout(function() {
+        var els = document.getElementsByTagName('del');
+        for (var i = 0; i < els.length; i++) {
+          els[i].remove();
         }
-      }
+        var els = document.getElementsByTagName('ins');
+        for (var i = 0; i < els.length; i++) {
+          els[i].setAttribute("style", "background-color: transparent;");
+        }
+      }, 2000);
     }
   </script>
+</head>
+<body>
+  <div id=out />
 </body>
 </html>
 

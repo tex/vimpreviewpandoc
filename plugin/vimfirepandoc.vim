@@ -1,22 +1,24 @@
 if exists( "g:vimfirepandoc" )
   autocmd FileType pandoc autocmd BufWritePost <buffer> call VimFirePandoc()
   autocmd FileType pandoc autocmd CursorHold,CursorHoldI <buffer> call VimFirePandoc()
-  autocmd FileType pandoc autocmd TextChanged,TextChangedI <buffer> call VimFireChanged()
+  autocmd FileType pandoc autocmd TextChanged,TextChangedI <buffer> call VimFireUpdate(1)
 endif
 
 let s:path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 
-let b:vimfirepandoc_update = 0
-
-function! VimFireChanged()
-    let b:vimfirepandoc_update = 1
+function! VimFireUpdate(value)
+    if !exists("b:vimfirepandoc_update") ==1
+        let b:vimfirepandoc_update = 1
+    endif
+    let l:old_value = b:vimfirepandoc_update
+    let b:vimfirepandoc_update = a:value
+    return l:old_value
 endfunction
 
 function! VimFirePandoc()
-    if b:vimfirepandoc_update == 1
-        let html64 = system("pandoc -t " . s:path . "/html_dot.lua | base64 -w0", GetBufContent())
+    if VimFireUpdate(0) == 1
+        let html64 = system("pandoc -t html --filter " . s:path . "/graphviz.py --filter " . s:path . "/realpath.py | base64 -w0", GetBufContent())
         call FireEvalJS("setOutput(\"" . html64 . "\")")
-        let b:vimfirepandoc_update = 0
     endif
 endfunction
 

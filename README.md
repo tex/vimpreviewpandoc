@@ -19,22 +19,22 @@ The Konqueror shows automatically correct preview, when using Firefox you have t
 
 ## Dependencies
 
- - pandoc *1.12.3.3*
- - base64
+ - VIM with Python support
+ - vimproc [https://github.com/Shougo/vimproc]()
  - python2
+ - pandoc *1.12.3.3*
  - pandocfilters [https://github.com/jgm/pandocfilters]()
- - pygraphviz [https://github.com/pygraphviz/pygraphviz]()
+ - graphviz
 
 ### Konqueror
 
- - dbus-send
- - konqueror *4.13.0*
+ - Konqueror *4.13.0*
+ - python2 dbus
 
 ### Firefox
 
  - Firefox
- - Remote Control extension (https://addons.mozilla.org/en-US/firefox/addon/remote-control/)
- - VIM with Python support
+ - Remote Control extension [https://addons.mozilla.org/en-US/firefox/addon/remote-control]()
 
 ## Theory of operation
 
@@ -44,8 +44,6 @@ The Konqueror shows automatically correct preview, when using Firefox you have t
 
     - custom filter to create a graphviz graphs from `dot` code blocks
     - custom filter to replace relative paths to images to absolute paths
-
- - base64 to encode pandoc output
 
     - Konqueror
 

@@ -17,31 +17,10 @@ endfunction
 
 function! VimFirePandoc()
     if VimFireUpdate(0) == 1
-        let html64 = system("pandoc -t html --filter " . s:path . "/graphviz.py --filter " . s:path . "/realpath.py | base64 -w0", GetBufContent())
-        call FireEvalJS("setOutput(\"" . html64 . "\")")
+        let path = resolve(expand('%:p:h'))
+        let tmp = tempname()
+        silent execute '%write '.tmp
+        let cmd = printf("%s/vimfirepandoc.py %s %s %s", s:path, tmp, s:path, path)
+        let sub = vimproc#system_bg(cmd)
     endif
-endfunction
-
-function! GetBufContent()
-    let bufnr = expand('<bufnr>')
-    return join(getbufline(bufnr, 1, "$"),"\n")
-endfunction
-
-function! FireEvalJS(content)
-python << endpython
-import vim
-import socket
-try:
-    data = ''
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('127.0.0.1', 32000))
-    s.send(vim.eval("a:content"))
-    data = s.recv(2048)
-    s.close()
-except socket.error:
-    vim.command("echohl ErrorMsg|echo 'Firefox or Remote Controller not running'|echohl None")
-finally:
-    vim.command("let s:TcpSendResult= '%s'" % data)
-endpython
-    return s:TcpSendResult
 endfunction

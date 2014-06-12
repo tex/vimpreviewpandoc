@@ -2,26 +2,43 @@
 
 ## Introduction
 
-VimPreviewPandoc is VIM plugin that helps with editing MarkDown-like documents.
+VimPreviewPandoc is VIM plugin that helps you with editing MarkDown-like documents.
 
-Edit you MarkDown-like documents in VIM and see a nice HTML-based output in Konqueror or Firefox.
+Edit your MarkDown documents in VIM and see a nice HTML-based output in Konqueror or Firefox.
 The web browser always shows changed area so you don't need to scroll manually.
 
-Add `let g:vimkonqpandoc = 1` to your `.vimrc` to set Konqueror as previewer.
+## Features
+
+ - Previews your markdown documents with Konqueror or Firefox
+ - Scrolls browser's view to show changed area automatically
+ - Generate `dot` graphs with `graphviz`
+
+## Installation
+
+Add `let g:vimkonqpandoc = 1` to your `.vimrc` to set Konqueror as previewer.<br>
 Add `let g:vimfirepandoc = 1` to your `.vimrc` to set Firefox as previewer.
 
-Place your VIM on one side of your screen and web browser on the other side to get
+Install this plugin either manually or using any plugin manager (Vundle, NeoBundle, ...).
+
+I also recommend you to install the following plugins to extend pandoc support:
+
+- [https://github.com/vim-pandoc/vim-pantondoc]()
+- [https://github.com/vim-pandoc/vim-pandoc-syntax.git]()
+- [https://github.com/vim-pandoc/vim-pandoc-after.git]()
+
+Add `autocmd BufNewFile,BufRead *.md set filetype=pandoc` to your `.vimrc` if not using `vim-pantondoc` which sets it.
+
+Place your VIM on one side of your screen and start manually web browser on the other side to get
 productive environment.
 
-The Konqueror shows automatically correct preview, when using Firefox you have to manually open `static/index.html` for first time.
+The Konqueror shows automatically correct preview. With Firefox you have to manually open `static/index.html` for first time.
 
 ![Screenshot](screen-1.png)
 
 ## Dependencies
 
- - VIM with Python support
+ - VIM with Python2 support
  - vimproc [https://github.com/Shougo/vimproc]()
- - python2
  - pandoc *1.12.3.3*
  - pandocfilters [https://github.com/jgm/pandocfilters]()
  - graphviz
@@ -38,9 +55,9 @@ The Konqueror shows automatically correct preview, when using Firefox you have t
 
 ## Theory of operation
 
- `BufWritePost` event executes following:
+ `BufWritePost`, `CursorHold,CusrsorHildI`, `TextChanged, TextChangedI` events execute the following:
 
- - `pandoc` to convert MarkDown document to HTML
+ - pandoc to convert MarkDown document to HTML
 
     - custom filter to create a graphviz graphs from `dot` code blocks
     - custom filter to replace relative paths to images to absolute paths
@@ -49,16 +66,21 @@ The Konqueror shows automatically correct preview, when using Firefox you have t
 
         - `DBUS` to control Konqueror
         - open `static/index.html` if not already opened
-        - pass `pandoc` output to the Konqueror using `DBUS` call `org.kde.KHTMLPart.evalJS`
+        - pass pandoc output to the Konqueror using `DBUS` call `org.kde.KHTMLPart.evalJS`
 
     - Firefox
 
         - `Remote Control` extension to control Firefox
-        - pass `pandoc` output to the Firefox using `Remote Control` (TCP socket, default parameters)
+        - pass pandoc output to the Firefox using `Remote Control` (TCP socket, default parameters)
 
-        both browsers evaluate JavaScript function `setOutput(html)` where html is `base64` encoded output from `pandoc`
+        Both browsers evaluate JavaScript function `setOutput(html)` where html is `base64` encoded output from pandoc
 
- - index.html is almost empty page with one `div` and `setOutput(html)` function
+ - index.html is empty page with one `div` and `setOutput(html)` function
 
-     function creates a `DOM` from the `html` parameter, compares it with what already is in the `div`, computes offset of first difference, updates the `div` with new output and scrolls window to it
+     - creates a `DOM` structure from the `html` parameter
+     - compares it with what already is in the `div`
+     - computes a diff of the first different element using [htmldiff.js](https://github.com/keanulee/htmldiff.js.git)
+     - updates the `div` with the new content
+     - replaces the first different element with the diff
+     - scrolls window to it
 

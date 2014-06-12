@@ -59,39 +59,59 @@
     var last_html = undefined;
 
     function setOutput(val){
-      var html = atob(val);
-
-      if (last_html === undefined) {
-          last_html = html;
-      }
-
       var out = document.getElementById('out');
-      out.innerHTML = this.htmldiff(last_html, html);
 
-      last_html = html;
+      // Use fast method to locate the first different element.
 
-      var min = undefined;
-      var ins = document.getElementsByTagName('ins');
-      var del = document.getElementsByTagName('del');
-      for (var i = 0; i < ins.length; i++) {
-          min = min === undefined || min > ins[i].offsetTop ? ins[i].offsetTop : min;
+      var old = out.cloneNode(true);
+      out.innerHTML = atob(val);
+
+      var allold = old.getElementsByTagName("*");
+      if (allold === undefined) {
+        return;
       }
-      for (var i = 0; i < del.length; i++) {
-          min = min === undefined || min > del[i].offsetTop ? del[i].offsetTop : min;
+      var allnew = out.getElementsByTagName("*");
+      if (allnew === undefined) {
+        return;
       }
 
-      window.scrollTo(0,min - window.outerHeight / 3);
+      for (var i = 0, max = Math.min(allold.length, allnew.length); i < max; i++) {
+        if ((allold[i].nodeName != allnew[i].nodeName) ||
+            (allold[i].innerHTML != allnew[i].innerHTML)) {
 
-      setTimeout(function() {
-        var els = document.getElementsByTagName('del');
-        for (var i = 0; i < els.length; i++) {
-          els[i].remove();
+          // Diff just the first different element. The htmldiff function
+          // is quite slow.
+
+          diff = this.htmldiff(allold[i].innerHTML, allnew[i].innerHTML);
+          allnew[i].innerHTML = diff;
+
+          var min = undefined;
+          var ins = document.getElementsByTagName('ins');
+          var del = document.getElementsByTagName('del');
+          for (var i = 0; i < ins.length; i++) {
+              min = min === undefined || min > ins[i].offsetTop ? ins[i].offsetTop : min;
+          }
+          for (var i = 0; i < del.length; i++) {
+              min = min === undefined || min > del[i].offsetTop ? del[i].offsetTop : min;
+          }
+
+          if (min !== undefined) {
+              window.scrollTo(0,min - window.outerHeight / 3);
+          }
+
+          setTimeout(function() {
+              var els = document.getElementsByTagName('del');
+                  for (var i = els.length - 1; i >= 0; i--) {
+                  els[i].parentNode.removeChild(els[i]);
+              }
+              var els = document.getElementsByTagName('ins');
+                  for (var i = els.length - 1; i >= 0; i--) {
+                  els[i].setAttribute("style", "background-color: transparent;");
+              }
+          }, 2000);
+          return;
         }
-        var els = document.getElementsByTagName('ins');
-        for (var i = 0; i < els.length; i++) {
-          els[i].setAttribute("style", "background-color: transparent;");
-        }
-      }, 2000);
+      }
     }
   </script>
 </head>

@@ -7,7 +7,7 @@ endif
 let s:path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 
 function! VimFireUpdate(value)
-    if !exists("b:vimfirepandoc_update") ==1
+    if !exists("b:vimfirepandoc_update")
         let b:vimfirepandoc_update = 1
     endif
     let l:old_value = b:vimfirepandoc_update
@@ -17,10 +17,9 @@ endfunction
 
 function! VimFirePandoc()
     if VimFireUpdate(0) == 1
-        let path = resolve(expand('%:p:h'))
         let tmp = tempname()
         silent execute '%write '.tmp
-        let cmd = printf("%s/vimfirepandoc.py %s %s %s", s:path, tmp, s:path, path)
+        let cmd = printf("%s/vimfirepandoc.py %s %s", s:path, tmp, resolve(expand("%:p")))
         let sub = vimproc#system_bg(cmd)
     endif
 endfunction

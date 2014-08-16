@@ -55,10 +55,11 @@ def main():
     projectpath = os.path.dirname(os.path.abspath(sys.argv[1]))
 
     cmd = ["pandoc" \
-          ,"--filter="+filterpath+"/graphviz.py" \
-          ,"--filter="+filterpath+"/realpath.py" \
-          ,"--number-section" \
-          ,sys.argv[1]]
+          , "--filter="+filterpath+"/graphviz.py" \
+          , "--filter="+filterpath+"/realpath.py" \
+          , "--number-section" \
+          , sys.argv[1]]
+    print(cmd)
     p = subprocess.Popen(cmd, shell=False, stdin=None, stdout=subprocess.PIPE, \
             close_fds=True, cwd=projectpath)
     data = p.stdout.read()
@@ -70,10 +71,12 @@ def main():
         time.sleep(1)
     EvalJS(dest, "setOutput('" + base64.b64encode(data) + "')")
 
-    cmd = ["pandoc", "--filter="+filterpath+"/graphviz.py", \
-            "--filter="+filterpath+"/realpath.py", \
-            sys.argv[1], \
-            "-o" + sys.argv[2] + ".docx"]
+    cmd = ["pandoc" \
+          , "--filter="+filterpath+"/graphviz.py" \
+          , "--filter="+filterpath+"/realpath.py" \
+          , sys.argv[1] \
+          , "-o" + sys.argv[2] + ".docx"]
+    print(cmd)
     p = subprocess.Popen(cmd, shell=False, stdin=None, stdout=None, \
             close_fds=True, cwd=projectpath)
     p.wait()

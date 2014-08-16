@@ -19,7 +19,7 @@ function! VimFirePandoc()
     if VimFireUpdate(0) == 1
         let tmp = tempname()
         silent execute '%write '.tmp
-        let cmd = printf("%s/vimfirepandoc.py %s %s", s:path, tmp, resolve(expand("%:p")))
+        let cmd = printf("%s/vimfirepandoc.py \"%s\" \"%s\"", s:path, tmp, substitute(resolve(expand("%:p")), '"', '\\"', 'g'))
         let sub = vimproc#system_bg(cmd)
     endif
 endfunction

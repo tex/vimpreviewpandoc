@@ -19,7 +19,7 @@ function! VimKonqPandoc()
     if VimKonqUpdate(0) == 1
         let tmp = tempname()
         silent execute '%write '.tmp
-        let cmd = printf("%s/vimkonqpandoc.py %s %s", s:path, tmp, resolve(expand("%:p")))
+        let cmd = printf("%s/vimkonqpandoc.py \"%s\" \"%s\"", s:path, tmp, substitute(expand(expand("%:p")), '"', '\\"', 'g'))
         let sub = vimproc#system_bg(cmd)
     endif
 endfunction

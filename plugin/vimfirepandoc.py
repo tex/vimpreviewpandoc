@@ -10,9 +10,10 @@ def main():
     filterpath = os.path.dirname(os.path.abspath(__file__))
     projectpath = os.path.dirname(os.path.abspath(sys.argv[1]))
 
-    cmd = ["pandoc", "--filter="+filterpath+"/graphviz.py", \
-                     "--filter="+filterpath+"/realpath.py", \
-           sys.argv[1]]
+    cmd = ["pandoc"
+          , "--filter="+filterpath+"/graphviz.py" \
+          , "--filter="+filterpath+"/realpath.py" \
+          , sys.argv[1]]
     p = subprocess.Popen(cmd, shell=False, stdin=None, stdout=subprocess.PIPE, \
                          close_fds=True, cwd=projectpath)
     data = p.stdout.read()
@@ -23,10 +24,11 @@ def main():
     data = s.recv(2048)
     s.close()
 
-    cmd = ["pandoc", "--filter="+filterpath+"/graphviz.py", \
-                     "--filter="+filterpath+"/realpath.py", \
-            sys.argv[1], \
-            "-o" + sys.argv[2] + ".docx"]
+    cmd = ["pandoc"
+          , "--filter="+filterpath+"/graphviz.py" \
+          , "--filter="+filterpath+"/realpath.py" \
+          , sys.argv[1] \
+          , "-o" + sys.argv[2] + ".docx"]
     p = subprocess.Popen(cmd, shell=False, stdin=None, stdout=None, \
             close_fds=True, cwd=projectpath)
     p.wait()

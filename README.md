@@ -22,9 +22,9 @@ Install this plugin either manually or using any plugin manager (Vundle, NeoBund
 
 I also recommend you to install the following plugins to extend pandoc support:
 
-- [https://github.com/vim-pandoc/vim-pantondoc]()
-- [https://github.com/vim-pandoc/vim-pandoc-syntax.git]()
-- [https://github.com/vim-pandoc/vim-pandoc-after.git]()
+- [vim-pantondoc](https://github.com/vim-pandoc/vim-pantondoc)
+- [vim-pandoc-syntax](https://github.com/vim-pandoc/vim-pandoc-syntax.git)
+- [vim-pandoc-after](https://github.com/vim-pandoc/vim-pandoc-after.git)
 
 Add `autocmd BufNewFile,BufRead *.md set filetype=pandoc` to your `.vimrc` if not using `vim-pantondoc` which sets it.
 
@@ -38,9 +38,9 @@ The Konqueror shows automatically correct preview. With Firefox you have to manu
 ## Dependencies
 
  - VIM with Python2 support
- - vimproc [https://github.com/Shougo/vimproc]()
+ - [vimproc](https://github.com/Shougo/vimproc)
  - pandoc *1.12.3.3*
- - pandocfilters [https://github.com/jgm/pandocfilters]()
+ - [pandocfilters](https://github.com/jgm/pandocfilters)
  - graphviz
 
 ### Konqueror
@@ -51,7 +51,7 @@ The Konqueror shows automatically correct preview. With Firefox you have to manu
 ### Firefox
 
  - Firefox
- - Remote Control extension [https://addons.mozilla.org/en-US/firefox/addon/remote-control]()
+ - [Remote Control extension](https://addons.mozilla.org/en-US/firefox/addon/remote-control)
 
 ## Theory of operation
 

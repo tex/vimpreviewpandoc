@@ -53,15 +53,15 @@ def EvalJS(dest, js):
 def main():
     filterpath = os.path.dirname(os.path.abspath(__file__))
     projectpath = os.path.dirname(os.path.abspath(sys.argv[1]))
+    cwdpath = os.path.dirname(os.path.abspath(sys.argv[2]))
 
     cmd = ["pandoc" \
           , "--filter="+filterpath+"/graphviz.py" \
           , "--filter="+filterpath+"/realpath.py" \
           , "--number-section" \
           , sys.argv[1]]
-    print(cmd)
     p = subprocess.Popen(cmd, shell=False, stdin=None, stdout=subprocess.PIPE, \
-            close_fds=True, cwd=projectpath)
+            close_fds=True, cwd=cwdpath)
     data = p.stdout.read()
 
     curr = os.path.realpath(filterpath + "/../static/index.html")
@@ -76,9 +76,8 @@ def main():
           , "--filter="+filterpath+"/realpath.py" \
           , sys.argv[1] \
           , "-o" + sys.argv[2] + ".docx"]
-    print(cmd)
     p = subprocess.Popen(cmd, shell=False, stdin=None, stdout=None, \
-            close_fds=True, cwd=projectpath)
+            close_fds=True, cwd=cwdpath)
     p.wait()
 
     os.remove(sys.argv[1])

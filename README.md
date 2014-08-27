@@ -12,7 +12,7 @@ The web browser always shows changed area so you don't need to scroll manually.
  - Previews your markdown documents with Konqueror or Firefox
  - Scrolls browser's view to show changed area automatically
  - Generate `dot` graphs with `graphviz`
- - `:call VimPreviewPandocGitDiff("HEAD~5", "HEAD")` shows diff of specified git revisions
+ - Show diff of specified git revisions (`:call VimPreviewPandocGitDiff("HEAD~5", "HEAD")`)
 
 ## Installation
 
@@ -38,10 +38,9 @@ Konqueror shows automatically correct preview. With Firefox you have to manually
  - VIM with Python2 support
  - [vimproc](https://github.com/Shougo/vimproc)
  - pandoc *1.12.3.3*
- - [pandocfilters](https://github.com/jgm/pandocfilters)
  - [graphviz](http://www.graphviz.org)
- - git, for git-diff
- - [htmltreediff](https://github.com/PolicyStat/htmltreediff.git)
+ - pyhton2 [pandocfilters](https://github.com/jgm/pandocfilters)
+ - python2 [htmltreediff](https://github.com/PolicyStat/htmltreediff.git)
 
 ### Konqueror
 

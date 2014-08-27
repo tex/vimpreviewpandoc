@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>Markdown Editor</title>
   <style>
+/*
     a{ color: #0645ad; text-decoration:none;}
     a:visited{ color: #0b0080; }
     a:hover{ color: #06e; }
@@ -48,42 +49,17 @@
     table { border-collapse: collapse; border-spacing: 0; }
     td, th { vertical-align: top; padding: 4px 10px; border: 1px solid #bbb; }
     tr:nth-child(even) td, tr:nth-child(even) th { background: #eee; }
-
-    ins { text-decoration: none; background-color: yellow; }
-    del { text-decoration: none; background-color: red; }
+*/
+    ins { text-decoration: none; color: green; }
+    del { text-decoration: none; color: red; }
   </style>
-
-  <script src="./htmldiff.js"></script>
 
   <script>
     var last_html = undefined;
 
     function setOutput(val){
-      var out = document.getElementById('out');
-
-      // Use fast method to locate the first different element.
-
-      var old = out.cloneNode(true);
-      out.innerHTML = atob(val);
-
-      var allold = old.getElementsByTagName("*");
-      if (allold === undefined) {
-        return;
-      }
-      var allnew = out.getElementsByTagName("*");
-      if (allnew === undefined) {
-        return;
-      }
-
-      for (var i = 0, max = Math.min(allold.length, allnew.length); i < max; i++) {
-        if ((allold[i].nodeName != allnew[i].nodeName) ||
-            (allold[i].innerHTML != allnew[i].innerHTML)) {
-
-          // Diff just the first different element. The htmldiff function
-          // is quite slow.
-
-          diff = this.htmldiff(allold[i].innerHTML, allnew[i].innerHTML);
-          allnew[i].innerHTML = diff;
+        var out = document.getElementById('out');
+        out.innerHTML = atob(val);
 
           var min = undefined;
           var ins = document.getElementsByTagName('ins');
@@ -99,20 +75,7 @@
               window.scrollTo(0,min - window.outerHeight / 3);
           }
 
-          setTimeout(function() {
-              var els = document.getElementsByTagName('del');
-                  for (var i = els.length - 1; i >= 0; i--) {
-                  els[i].parentNode.removeChild(els[i]);
-              }
-              var els = document.getElementsByTagName('ins');
-                  for (var i = els.length - 1; i >= 0; i--) {
-                  els[i].parentNode.innerHTML = els[i].parentNode.innerHTML.replace("<ins>","").replace("</ins>","");
-              }
-          }, 2000);
-          return;
-        }
-      }
-    }
+   }
   </script>
 </head>
 <body>

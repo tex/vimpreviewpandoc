@@ -12,11 +12,9 @@ The web browser always shows changed area so you don't need to scroll manually.
  - Previews your markdown documents with Konqueror or Firefox
  - Scrolls browser's view to show changed area automatically
  - Generate `dot` graphs with `graphviz`
+ - `:call VimPreviewPandocGitDiff("HEAD~5", "HEAD")` shows diff of specified git revisions
 
 ## Installation
-
-Add `let g:vimkonqpandoc = 1` to your `.vimrc` to set Konqueror as previewer.<br>
-Add `let g:vimfirepandoc = 1` to your `.vimrc` to set Firefox as previewer.
 
 Install this plugin either manually or using any plugin manager (Vundle, NeoBundle, ...).
 
@@ -31,7 +29,7 @@ Add `autocmd BufNewFile,BufRead *.md set filetype=pandoc` to your `.vimrc` if no
 Place your VIM on one side of your screen and start manually web browser on the other side to get
 productive environment.
 
-The Konqueror shows automatically correct preview. With Firefox you have to manually open `static/index.html` for first time.
+Konqueror shows automatically correct preview. With Firefox you have to manually open `static/index.html` for first time.
 
 ![Screenshot](screen-1.png)
 
@@ -41,7 +39,9 @@ The Konqueror shows automatically correct preview. With Firefox you have to manu
  - [vimproc](https://github.com/Shougo/vimproc)
  - pandoc *1.12.3.3*
  - [pandocfilters](https://github.com/jgm/pandocfilters)
- - graphviz
+ - [graphviz](http://www.graphviz.org)
+ - git, for git-diff
+ - [htmltreediff](https://github.com/PolicyStat/htmltreediff.git)
 
 ### Konqueror
 
@@ -57,10 +57,14 @@ The Konqueror shows automatically correct preview. With Firefox you have to manu
 
  `BufWritePost`, `CursorHold,CusrsorHildI`, `TextChanged, TextChangedI` events execute the following:
 
- - pandoc to convert MarkDown document to HTML
+ - `git-diff` to create a word granularity diff
+
+ - pandoc to convert MarkDown diff document to HTML
 
     - custom filter to create a graphviz graphs from `dot` code blocks
     - custom filter to replace relative paths to images to absolute paths
+
+ - `htmltreediff` to create structure aware html diff
 
     - Konqueror
 
@@ -77,10 +81,6 @@ The Konqueror shows automatically correct preview. With Firefox you have to manu
 
  - index.html is empty page with one `div` and `setOutput(html)` function
 
-     - creates a `DOM` structure from the `html` parameter
-     - compares it with what already is in the `div`
-     - computes a diff of the first different element using [htmldiff.js](https://github.com/keanulee/htmldiff.js.git)
-     - updates the `div` with the new content
-     - replaces the first different element with the diff
+     - finds first occurrence of `ins` or `del` tag
      - scrolls window to it
 

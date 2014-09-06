@@ -12,6 +12,7 @@ The web browser always shows changed area so you don't need to scroll manually.
  - Previews your markdown documents with Konqueror or Firefox
  - Scrolls browser's view to show changed area automatically
  - Generate `dot` graphs with `graphviz`
+ - Generate `blockdiag`, `seqdiag`, `actdiag`, `nwdiag` graphs
  - Show diff of specified git revisions (`:call VimPreviewPandocGitDiff("HEAD~5", "HEAD")`)
 
 ## Installation
@@ -26,8 +27,7 @@ I also recommend you to install the following plugins to extend pandoc support:
 
 Add `autocmd BufNewFile,BufRead *.md set filetype=pandoc` to your `.vimrc` if not using `vim-pantondoc` which sets it.
 
-Place your VIM on one side of your screen and start manually web browser on the other side to get
-productive environment.
+Place your VIM on one side of your screen and start manually web browser on the other side to get productive environment.
 
 Konqueror shows automatically correct preview. With Firefox you have to manually open `static/index.html` for first time.
 
@@ -38,9 +38,19 @@ Konqueror shows automatically correct preview. With Firefox you have to manually
  - VIM with Python2 support
  - [vimproc](https://github.com/Shougo/vimproc)
  - pandoc *1.12.3.3*
- - [graphviz](http://www.graphviz.org)
  - pyhton2 [pandocfilters](https://github.com/jgm/pandocfilters)
  - python2 [htmltreediff](https://github.com/PolicyStat/htmltreediff.git)
+
+### Dot block support
+
+ - [graphviz](http://www.graphviz.org)
+
+### Diag block support
+
+ - [blockdiag](http://blockdiag.com/en/blockdiag/index.html)
+ - [seqdiag](http://blockdiag.com/en/seqdiag/index.html)
+ - [actdiag](http://blockdiag.com/en/actdiag/index.html)
+ - [nwdiag](http://blockdiag.com/en/nwdiag/index.html)
 
 ### Konqueror
 
@@ -58,9 +68,10 @@ Konqueror shows automatically correct preview. With Firefox you have to manually
 
  - `git-diff` to create a word granularity diff
 
- - pandoc to convert MarkDown diff document to HTML
+ - `pandoc` to convert MarkDown diff document to HTML
 
-    - custom filter to create a graphviz graphs from `dot` code blocks
+    - custom filter to create a `graphviz` graphs from *dot* code blocks
+    - custom filter to create a `blockdiag`, `seqdiag`, `actdiag`, `nwdiag` graphs from *blockdiag*, *seqdiag*, *actdiag*, *nwdiag* blocks
     - custom filter to replace relative paths to images to absolute paths
 
  - `htmltreediff` to create structure aware html diff
@@ -82,4 +93,3 @@ Konqueror shows automatically correct preview. With Firefox you have to manually
 
      - finds first occurrence of `ins` or `del` tag
      - scrolls window to it
-

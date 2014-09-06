@@ -17,12 +17,14 @@ def sha1(x):
 imagedir = ".dot"
 
 def pipe(cmd, data):
-    p = subprocess.Popen(cmd, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
+    p = subprocess.Popen(cmd, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
     p.stdin.write(data)
     p.stdin.close()
     data = p.stdout.read()
     p.stdout.close()
-    return data
+    err = p.stderr.read()
+    p.stderr.close()
+    return data, err
 
 def graphviz(key, value, format, meta):
   if key == 'CodeBlock':
@@ -39,7 +41,9 @@ def graphviz(key, value, format, meta):
             os.mkdir(imagedir)
         except OSError:
             pass
-        data = pipe(["dot", "-Tpng", "-s100"], code)
+        data, err = pipe(["dot", "-Tpng", "-s100"], code)
+        if (len(err) > 0):
+            return Para([Str(err)])
         with open(src, 'w') as f:
           f.write(data)
       return Para([Image([alt], [src,tit])])

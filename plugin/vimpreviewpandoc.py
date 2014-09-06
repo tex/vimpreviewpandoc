@@ -9,6 +9,9 @@ import time
 import socket
 from xml.dom import minidom
 import htmltreediff
+import traceback
+
+FILTER_PATH = os.path.dirname(os.path.abspath(__file__))
 
 ## Konqueror
 
@@ -54,8 +57,8 @@ def EvalJS(dest, js):
     widget = FindWidget(dest)
     return dbus_iface(dest, "/KHTML/%s/widget" % widget, "org.kde.KHTMLPart").evalJS(js)
 
-def konqueror_output(filterpath, data):
-    curr = os.path.realpath(filterpath + "/../static/index.html")
+def konqueror_output(data):
+    curr = os.path.realpath(FILTER_PATH + "/../static/index.html")
     dest = FindDest()
     if CurrentUrl(dest) != "file://" + curr:
         OpenUrl(dest, curr)
@@ -64,7 +67,7 @@ def konqueror_output(filterpath, data):
 
 ## Firefox
 
-def firefox_output(filterpath, data):
+def firefox_output(data):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', 32000))
     s.send("setOutput('" + base64.b64encode(data) + "')")
@@ -73,19 +76,20 @@ def firefox_output(filterpath, data):
 
 ## Common
 
-def try_output(filterpath, data):
+def try_output(data):
     try:
-        konqueror_output(filterpath, data)
+        konqueror_output(data)
     except Exception:
         try:
-            firefox_output(filterpath, data)
+            firefox_output(data)
         except Exception:
             pass
 
-def pandoc(cwdpath, filterpath, filename):
+def pandoc(cwdpath, filename):
     cmd = ["pandoc" \
-          , "--filter="+filterpath+"/graphviz.py" \
-          , "--filter="+filterpath+"/realpath.py" \
+          , "--filter="+FILTER_PATH+"/graphviz.py" \
+          , "--filter="+FILTER_PATH+"/blockdiag.py" \
+          , "--filter="+FILTER_PATH+"/realpath.py" \
           , "--number-section"
           , filename]
     p = subprocess.Popen(cmd, shell=False, stdin=None, stdout=subprocess.PIPE, \
@@ -94,29 +98,35 @@ def pandoc(cwdpath, filterpath, filename):
     return data
 
 def main():
-    filterpath = os.path.dirname(os.path.abspath(__file__))
-    cwdpath = os.path.dirname(os.path.abspath(sys.argv[2]))
-    newfilename = sys.argv[1]
-    oldfilename = sys.argv[2]
+    try:
+        cwdpath = os.path.dirname(os.path.abspath(sys.argv[2]))
+        newfilename = sys.argv[1]
+        oldfilename = sys.argv[2]
 
-    # Diff html
-    tn = pandoc(cwdpath, filterpath, newfilename)
-    to = pandoc(cwdpath, filterpath, oldfilename)
-    diff = htmltreediff.diff(to, tn)
+        # Diff html
+        tn = pandoc(cwdpath, newfilename)
+        to = pandoc(cwdpath, oldfilename)
+        diff = htmltreediff.diff(to, tn)
 
-    try_output(filterpath, diff);
+        try_output(diff);
 
-    # Generate Microsoft Word docx document
-    cmd = ["pandoc" \
-          , "--filter="+filterpath+"/graphviz.py" \
-          , "--filter="+filterpath+"/realpath.py" \
-          , newfilename \
-          , "-o" + oldfilename + ".docx"]
-    p = subprocess.Popen(cmd, shell=False, stdin=None, stdout=None, \
-            close_fds=True, cwd=cwdpath)
-    p.wait()
+        # Generate Microsoft Word docx document
+        cmd = ["pandoc" \
+              , "--filter="+FILTER_PATH+"/graphviz.py" \
+              , "--filter="+FILTER_PATH+"/blockdiag.py" \
+              , "--filter="+FILTER_PATH+"/realpath.py" \
+              , newfilename \
+              , "-o" + oldfilename + ".docx"]
+        p = subprocess.Popen(cmd, shell=False, stdin=None, stdout=None, \
+                close_fds=True, cwd=cwdpath)
+        p.wait()
 
-    os.remove(sys.argv[1])
+        os.remove(sys.argv[1])
+
+    except Exception as e:
+        try_output(
+                "<h1>Fatal error</h1>" + "<h2>vimpreviewpandoc.py</h2>" +
+                "<p>" + traceback.format_exc() + "</p>")
 
 if __name__ == "__main__":
     main()

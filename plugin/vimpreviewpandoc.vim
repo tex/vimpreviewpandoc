@@ -2,7 +2,7 @@ autocmd FileType pandoc autocmd BufWritePost <buffer> call VimPreviewPandoc()
 autocmd FileType pandoc autocmd CursorHold,CursorHoldI <buffer> call VimPreviewPandoc()
 autocmd FileType pandoc autocmd TextChanged,TextChangedI <buffer> call VimPreviewPandocUpdate(1)
 
-let s:path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+let s:path = substitute(fnamemodify(resolve(expand('<sfile>:p')), ':h'), '"', '\\"', 'g')
 
 function! VimPreviewPandocUpdate(value)
     if !exists("b:vimpreviewpandoc_update")
@@ -23,7 +23,7 @@ function! VimPreviewPandoc()
 endfunction
 
 function! VimPreviewPandocGitDiff(old, new)
-    let cmd = printf("%s/vimpreviewpandoc_diff.py \"%s\" \"%s\" \"%s\"", s:path, substitute(expand("%"), '"', '\\"', 'g'), a:old, a:new)
+    let cmd = printf("%s/vimpreviewpandoc_diff.py \"%s\" \"%s\" \"%s\"", s:path, substitute(expand("%p"), '"', '\\"', 'g'), a:old, a:new)
     let sub = vimproc#system_bg(cmd)
 endfunction
 

@@ -9,6 +9,7 @@ import htmltreediff
 def pandoc(cwdpath, filterpath, inp):
     cmd = ["pandoc" \
           , "--filter="+filterpath+"/graphviz.py" \
+          , "--filter="+filterpath+"/blockdiag.py" \
           , "--filter="+filterpath+"/realpath.py" \
           , "--number-section"]
     p = subprocess.Popen(cmd, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, \

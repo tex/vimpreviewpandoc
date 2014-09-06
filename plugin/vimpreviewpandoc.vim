@@ -2,7 +2,10 @@ autocmd FileType pandoc autocmd BufWritePost <buffer> call VimPreviewPandoc()
 autocmd FileType pandoc autocmd CursorHold,CursorHoldI <buffer> call VimPreviewPandoc()
 autocmd FileType pandoc autocmd TextChanged,TextChangedI <buffer> call VimPreviewPandocUpdate(1)
 
-let s:path = substitute(fnamemodify(resolve(expand('<sfile>:p')), ':h'), '"', '\\"', 'g')
+let s:save_shellslash = &shellslash
+set shellslash
+
+let s:path = expand('<sfile>:p:h')
 
 function! VimPreviewPandocUpdate(value)
     if !exists("b:vimpreviewpandoc_update")
@@ -17,13 +20,15 @@ function! VimPreviewPandoc()
     if VimPreviewPandocUpdate(0) == 1
         let tmp = tempname()
         silent execute '%write '.tmp
-        let cmd = printf("%s/vimpreviewpandoc.py \"%s\" \"%s\"", s:path, tmp, substitute(resolve(expand("%:p")), '"', '\\"', 'g'))
+        let cmd = printf("%s %s %s", shellescape(s:path . "/vimpreviewpandoc.py"), shellescape(tmp), shellescape(expand("%p")))
         let sub = vimproc#system_bg(cmd)
     endif
 endfunction
 
 function! VimPreviewPandocGitDiff(old, new)
-    let cmd = printf("%s/vimpreviewpandoc_diff.py \"%s\" \"%s\" \"%s\"", s:path, substitute(expand("%p"), '"', '\\"', 'g'), a:old, a:new)
+    let cmd = printf("%s %s %s %s", shellescape(s:path . "/vimpreviewpandoc_diff.py"), shellescape(expand("%p")), a:old, a:new)
     let sub = vimproc#system_bg(cmd)
 endfunction
 
+let shellslash = s:save_shellslash
+unlet s:save_shellslash

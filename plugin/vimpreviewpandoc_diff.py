@@ -28,20 +28,26 @@ def git_show(filename, rev):
     return p.stdout.read()
 
 def main():
-    filterpath = os.path.dirname(os.path.abspath(__file__))
+    try:
+        filterpath = os.path.dirname(os.path.abspath(__file__))
 
-    filename = sys.argv[1]
-    cwdpath = os.path.dirname(os.path.abspath(filename))
+        filename = sys.argv[1]
+        cwdpath = os.path.dirname(os.path.abspath(filename))
 
-    oldrev = sys.argv[2]
-    newrev = sys.argv[3]
+        oldrev = sys.argv[2]
+        newrev = sys.argv[3]
 
-    # Diff html
-    tn = pandoc(cwdpath, filterpath, git_show(filename, newrev))
-    to = pandoc(cwdpath, filterpath, git_show(filename, oldrev))
-    diff = htmltreediff.diff(to, tn)
+        # Diff html
+        tn = pandoc(cwdpath, filterpath, git_show(filename, newrev))
+        to = pandoc(cwdpath, filterpath, git_show(filename, oldrev))
+        diff = htmltreediff.diff(to, tn)
 
-    vimpreviewpandoc.try_output(filterpath, diff)
+        vimpreviewpandoc.try_output(diff)
+
+    except Exception as e:
+        try_output(
+                "<h1>Fatal error</h1>" + "<h2>vimpreviewpandoc_diff.py</h2>" +
+                "<p>" + traceback.format_exc() + "</p>")
 
 if __name__ == "__main__":
     main()

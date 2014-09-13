@@ -45,8 +45,10 @@ def main():
         vimpreviewpandoc.try_output(diff)
 
     except Exception as e:
+        arguments = "<br>".join(sys.argv);
         try_output(
                 "<h1>Fatal error</h1>" + "<h2>vimpreviewpandoc_diff.py</h2>" +
+                "<p>" + arguments + "</p>" +
                 "<p>" + traceback.format_exc() + "</p>")
 
 if __name__ == "__main__":

@@ -125,8 +125,10 @@ def main():
         os.remove(sys.argv[1])
 
     except Exception as e:
+        arguments = "<br>".join(sys.argv);
         try_output(
                 "<h1>Fatal error</h1>" + "<h2>vimpreviewpandoc.py</h2>" +
+                "<p>" + arguments + "</p>" +
                 "<p>" + traceback.format_exc() + "</p>")
 
 if __name__ == "__main__":

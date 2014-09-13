@@ -91,6 +91,7 @@ def pandoc(cwdpath, filename):
           , "--filter="+FILTER_PATH+"/blockdiag.py" \
           , "--filter="+FILTER_PATH+"/realpath.py" \
           , "--number-section"
+          , "--ascii"
           , filename]
     p = subprocess.Popen(cmd, shell=False, stdin=None, stdout=subprocess.PIPE, \
             close_fds=True, cwd=cwdpath)

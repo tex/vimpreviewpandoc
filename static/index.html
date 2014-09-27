@@ -33,7 +33,6 @@
     }
     pre { white-space: pre; white-space: pre-wrap; word-wrap: break-word; padding: 5px;}
     pre code { border: 0px !important; background: transparent !important; line-height: 1.3em; }
-    code { padding: 0 3px 0 3px; }
     sub, sup { font-size: 75%; line-height: 0; position: relative; vertical-align: baseline; }
     sup { top: -0.5em; }
     sub { bottom: -0.25em; }
@@ -53,27 +52,121 @@
   </style>
 
   <script>
+
+    var smooth_scroll_to = function(target, duration) {
+        target = Math.round(target);
+        duration = Math.round(duration);
+        if (duration === 0) {
+            window.scrollTo(0, target);
+            return
+        }
+
+        var start_time = Date.now();
+        var end_time = start_time + duration;
+
+        var start_top = document.documentElement.scrollTop || document.body.scrollTop
+        var distance = target - start_top;
+
+        // based on http://en.wikipedia.org/wiki/Smoothstep
+        var smooth_step = function(start, end, point) {
+            if(point <= start) { return 0; }
+            if(point >= end) { return 1; }
+            var x = (point - start) / (end - start); // interpolation
+            return x*x*(3 - 2*x);
+        }
+
+        // This is to keep track of where the window's scrollTop is
+        // supposed to be, based on what we're doing
+        var previous_top = document.documentElement.scrollTop || document.body.scrollTop
+
+        // This is like a think function from a game loop
+        var scroll_frame = function() {
+            var tmp = document.documentElement.scrollTop || document.body.scrollTop
+            if(tmp != previous_top) {
+                reject("interrupted");
+                return;
+            }
+
+            // set the scrollTop for this frame
+            var now = Date.now();
+            var point = smooth_step(start_time, end_time, now);
+            var frameTop = Math.round(start_top + (distance * point));
+            window.scrollTo(0, frameTop);
+
+            // check if we're done!
+            if(now >= end_time) {
+                resolve();
+                return;
+            }
+
+            // If we were supposed to scroll but didn't, then we
+            // probably hit the limit, so consider it done; not
+            // interrupted.
+            var tmp = document.documentElement.scrollTop || document.body.scrollTop
+            if(tmp === previous_top
+                && tmp !== frameTop) {
+                resolve();
+                return;
+            }
+            previous_top = tmp;
+
+            // schedule next frame for execution
+            setTimeout(scroll_frame, 0);
+        }
+
+        // boostrap the animation process
+        setTimeout(scroll_frame, 0);
+    }
+
     var last_html = undefined;
 
+    /** Function count the occurrences of substring in a string;
+     * @param {String} string   Required. The string;
+     * @param {String} subString    Required. The string to search for;
+     * @param {Boolean} allowOverlapping    Optional. Default: false;
+     */
+    function occurrences(string, subString, allowOverlapping){
+
+        string+=""; subString+="";
+        if(subString.length<=0) return string.length+1;
+
+        var n=0, pos=0;
+        var step=(allowOverlapping)?(1):(subString.length);
+
+        while(true){
+            pos=string.indexOf(subString,pos);
+            if(pos>=0){
+                n++; pos+=step;
+            } else
+                break;
+        }
+        return(n);
+    }
+
+    function unescape1(data) {
+        return decodeURIComponent(escape(window.atob(data)))
+    }
+
+    /* TODO: highligh the W */
+    /* TODO: scroll to W exactly */
+    function setCursor(W, C) {
+        W = unescape1(W);
+        var d = document.getElementById('out');
+        for (var i = 0; i < d.childNodes.length; i++) {
+            f = occurrences(d.childNodes[i].textContent, W, false);
+            C = C - f;
+            if (C <= 0) {
+                smooth_scroll_to(d.childNodes[i].offsetTop - window.outerHeight / 3, 500)
+                return;
+            }
+        }
+    }
+
     function setOutput(val){
+        val = unescape1(val)
         var out = document.getElementById('out');
-        out.innerHTML = atob(val);
-
-          var min = undefined;
-          var ins = document.getElementsByTagName('ins');
-          var del = document.getElementsByTagName('del');
-          for (var i = 0; i < ins.length; i++) {
-              min = min === undefined || min > ins[i].offsetTop ? ins[i].offsetTop : min;
-          }
-          for (var i = 0; i < del.length; i++) {
-              min = min === undefined || min > del[i].offsetTop ? del[i].offsetTop : min;
-          }
-
-          if (min !== undefined) {
-              window.scrollTo(0,min - window.outerHeight / 3);
-          }
-
-   }
+        out.innerHTML = val;
+    }
   </script>
 </head>
 <body>

@@ -17,11 +17,20 @@ The web browser always shows changed area so you don't need to scroll manually.
 
  - Show structural diff of specified file between specified git revisions
 
-    `:call VimPreviewPandocGitDiff(expand("%"), "HEAD~5", "HEAD")`
+    - `:call VimPreviewPandocGitDiff(expand("%"), "HEAD~5", "HEAD")`
+    - `:Unite giti/log`, a (action), *diff_pandoc_preview*
 
  - Generate output document in specified output format
 
     `:call VimPreviewPandocConvertTo("docx,html")`
+
+
+## Todo
+
+- Add support for plotting
+
+    - python2 [matplotlib]()?
+    - [gnuplot]()?
 
 ## Installation
 

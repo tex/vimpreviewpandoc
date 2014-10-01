@@ -49,9 +49,14 @@
     ins a{ color: green; text-decoration:none; }
     del a{ color: red; text-decoration: none; }
 
+    #page { position: relative; }
+    #mes { position: fixed; margin-right: -40px; visibility: hidden; }
+
   </style>
 
   <script>
+
+    var flag_manual = false;
 
     var smooth_scroll_to = function(target, duration) {
         target = Math.round(target);
@@ -83,7 +88,6 @@
         var scroll_frame = function() {
             var tmp = document.documentElement.scrollTop || document.body.scrollTop
             if(tmp != previous_top) {
-                reject("interrupted");
                 return;
             }
 
@@ -95,7 +99,6 @@
 
             // check if we're done!
             if(now >= end_time) {
-                resolve();
                 return;
             }
 
@@ -105,7 +108,6 @@
             var tmp = document.documentElement.scrollTop || document.body.scrollTop
             if(tmp === previous_top
                 && tmp !== frameTop) {
-                resolve();
                 return;
             }
             previous_top = tmp;
@@ -147,9 +149,17 @@
         return decodeURIComponent(escape(window.atob(data)))
     }
 
+    var g_W;
+    var g_C;
+
     /* TODO: highligh the W */
     /* TODO: scroll to W exactly */
     function setCursor(W, C) {
+        if (flag_manual) {
+            g_W = W;
+            g_C = C;
+            return;
+        }
         W = unescape1(W);
         var d = document.getElementById('out');
         for (var i = 0; i < d.childNodes.length; i++) {
@@ -166,11 +176,42 @@
         val = unescape1(val)
         var out = document.getElementById('out');
         out.innerHTML = val;
+        flag_manual = false;
+        document.getElementById("mes").style.visibility="hidden";
+        window.onresize();
     }
+
+    document.onwheel = function(x) {
+        if (!flag_manual) {
+            document.getElementById("mes").style.visibility="visible";
+            flag_manual = true;
+        }
+    }
+    document.onkeypress = function(x) {
+        if (x.keyCode == 40 /*Down*/ || x.keyCode == 38 /*Up*/)
+            if (!flag_manual) {
+                document.getElementById("mes").style.visibility="visible";
+                flag_manual = true;
+            }
+    }
+    window.onresize = function(x) {
+        var mes = document.getElementById("mes");
+        mes.style.marginLeft = (document.body.clientWidth - mes.offsetWidth - 30) + "px";
+    }
+
+    function scroll_automaticaly() {
+        flag_manual = false;
+        document.getElementById("mes").style.visibility="hidden";
+        setCursor(g_W,g_C);
+    }
+
   </script>
 </head>
 <body>
-  <div id=out />
+  <div id=page>
+    <div id=mes><input type="button" value="Scroll automatically" onclick=scroll_automaticaly() /></div>
+    <div id=out></div>
+  </div>
 </body>
 </html>
 

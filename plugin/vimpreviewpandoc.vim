@@ -1,3 +1,9 @@
+" Python support required!
+if has("python")
+
+" Make sure it gets loaded.
+py import vim
+
 autocmd FileType pandoc autocmd BufWinEnter <buffer> call VimPreviewPandoc(1)
 autocmd FileType pandoc autocmd CursorHold,CursorHoldI <buffer> call VimPreviewPandoc(0)
 autocmd FileType pandoc autocmd CursorHold,CursorHoldI <buffer> call VimPreviewScrollTo()
@@ -37,13 +43,20 @@ import os
 import sys
 import base64
 import subprocess
-import dbus
 import time
 import socket
 import traceback
 from xml.dom import minidom
 import threading
 import htmltreediff
+import imp
+
+try:
+    imp.find_module('dbus')
+    import dbus
+    dbus_found = True
+except ImportError:
+    dbus_found = False
 
 ## Konqueror
 
@@ -92,6 +105,8 @@ def EvalJS(dest, js):
 #################
 
 def konqueror_output(swd, data):
+    if (dbus_found != True):
+       raise
     curr = os.path.realpath( \
               os.path.join(swd, \
                  "static", "index.html"))
@@ -256,3 +271,10 @@ def ConvertTo(exts):
     for p in ps:
         p.wait()
 EOF
+
+else
+
+echoerr "VimPreviewPandoc: Python support required!"
+
+endif
+

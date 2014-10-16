@@ -13,7 +13,8 @@ The web browser always shows changed area so you don't need to scroll manually.
 
     - Scroll browser's view to show changed area automatically
     - Generate `dot` graphs with `graphviz`
-    - Generate `blockdiag`, `seqdiag`, `actdiag`, `nwdiag` graphs
+    - Generate `blockdiag`, `seqdiag`, `actdiag`, `nwdiag`, `packetdiag`, `rackdiag` graphs
+    - Generate `R` graphs
 
  - Show structural diff of specified file between specified git revisions
 
@@ -24,13 +25,177 @@ The web browser always shows changed area so you don't need to scroll manually.
 
     `:call VimPreviewPandocConvertTo("docx,html")`
 
+## Examples
 
-## Todo
+### *DOT* Graph
 
-- Add support for plotting
+This *DOT* code is shown as the following picture in the preview window:
 
-    - python2 [matplotlib]()?
-    - [gnuplot]()?
+    ```dot
+    graph {
+    A -- B
+    C -- B
+    C -- D
+    }
+    ```
+
+![](.dot/aec7aeb0383414f6b9953047930d7e6a98eba221.png)
+
+### *Blockdiag* Graph
+
+This *DOT* code is shown as the following picture in the preview window:
+
+    ```blockdiag
+    blockdiag {
+    A -> B -> C
+    }
+    ```
+
+![](.dot/1a92794a2297a42b1a8c4333a02a2a1fd0ad0531.png)
+
+### *Seqdiag* Graph
+
+This *Seqdiag* code is shown as the following picture in the preview window:
+
+    ```seqdiag
+    seqdiag {
+      browser  -> webserver [label = "GET /index.html"];
+      browser <-- webserver;
+      browser  -> webserver [label = "POST /blog/comment"];
+                  webserver  -> database [label = "INSERT comment"];
+                  webserver <-- database;
+      browser <-- webserver;
+    }
+    ```
+
+![](.dot/ed14e596b4aae2d220c398a53d8348a0e747c47e.png)
+
+### *Actdiag* Graph
+
+This *Actdiag* code is shown as the following picture in the preview window:
+
+    ```actdiag
+    actdiag {
+      write -> convert -> image
+
+      lane user {
+         label = "User"
+         write [label = "Writing reST"];
+         image [label = "Get diagram IMAGE"];
+      }
+      lane actdiag {
+         convert [label = "Convert reST to Image"];
+      }
+    }
+    ```
+
+![](.dot/b1e11e258d038f18d8ac1c6a6b18507438faf842.png)
+
+### *Nwdiag* Graph
+
+This *Nwdiag* code is shown as the following picture in the preview window:
+
+    ```nwdiag
+    nwdiag {
+      network dmz {
+          address = "210.x.x.x/24"
+
+          web01 [address = "210.x.x.1"];
+          web02 [address = "210.x.x.2"];
+      }
+      network internal {
+          address = "172.x.x.x/24";
+
+          web01 [address = "172.x.x.1"];
+          web02 [address = "172.x.x.2"];
+          db01;
+          db02;
+      }
+    }
+    ```
+
+![](.dot/f554ea7bf97fb660fa23931c6b1129f1af825cf9.png)
+
+### *Packetdiag* Graph
+
+This *Packetdiag* code is shown as the following picture in the preview window:
+
+    ```packetdiag
+    {
+      colwidth = 32
+      node_height = 72
+
+      0-15: Source Port
+      16-31: Destination Port
+      32-63: Sequence Number
+      64-95: Acknowledgment Number
+      96-99: Data Offset
+      100-105: Reserved
+      106: URG [rotate = 270]
+      107: ACK [rotate = 270]
+      108: PSH [rotate = 270]
+      109: RST [rotate = 270]
+      110: SYN [rotate = 270]
+      111: FIN [rotate = 270]
+      112-127: Window
+      128-143: Checksum
+      144-159: Urgent Pointer
+      160-191: (Options and Padding)
+      192-223: data [colheight = 3]
+    }
+    ```
+
+![](.dot/bf2856a4c0ead5305f15bd74063717f1df5631d8.png)
+
+### *Rackdiag* Graph
+
+This *Rackdiag* code is shown as the following picture in the preview window:
+
+    ```rackdiag
+    rackdiag {
+      // define height of rack
+      16U;
+
+      // define rack items
+      1: UPS [2U];
+      3: DB Server
+      4: Web Server
+      5: Web Server
+      6: Web Server
+      7: Load Balancer
+      8: L3 Switch
+    }
+    ```
+
+![](.dot/d26aa0f06de6baa647e45b2295901dce690d0711.png)
+
+### *R* Graph
+
+This *R* code is shown as the following picture in the preview window:
+
+    ```R
+    y <- c(1,4,9,13,10)
+    x <- c(1,2,3,4, 5 )
+    xx <- seq(1, 5, length.out=250)
+
+    plot(x, y)
+
+    fit <- lm(y~x)
+    label1 <- bquote(italic(R)^2 == .(format(summary(fit)$adj.r.squared, digits=4)))
+    lines(xx, predict(fit, data.frame(x=xx)))
+    fnc1 <- bquote(y == .(coef(fit)[[2]]) * x + .(coef(fit)[[1]]))
+
+
+    fit <- lm(y~poly(x,3, raw = TRUE))
+    label2 <- bquote(italic(R)^2 == .(format(summary(fit)$adj.r.squared, digits=4)))
+    lines(xx, predict(fit, data.frame(x=xx)))
+    fnc2 <- bquote(y == .(coef(fit)[[4]]) * x^3 + .(coef(fit)[[3]]) * x^2 + .(coef(fit)[[2]]) * x + .  (coef(fit)[[1]]))
+
+    labels <- c(label1, fnc1, label2, fnc2)
+    legend("topleft", bty="n", legend=as.expression(labels))
+    ```
+
+![](.dot/c060227482573a97936b015961bb7e51b9d7b286.png)
 
 ## Installation
 
@@ -48,8 +213,6 @@ Place your VIM on one side of your screen and manually start a web browser on th
 
 Konqueror shows automatically correct preview. With Firefox you have to manually open `static/index.html` for first time.
 
-![Screenshot](screen-1.png)
-
 ## Dependencies
 
  - VIM with Python2 support
@@ -59,22 +222,26 @@ Konqueror shows automatically correct preview. With Firefox you have to manually
 ### Structural diff support
 
  - python2 [htmltreediff](https://github.com/PolicyStat/htmltreediff.git)
- - optionally [unite.vim](https://github.com/Shougo/unite.vim.git) and [vim-unite-giti](https://github.com/kmnk/vim-unite-giti.git)
+ - optionally [unite.vim](https://github.com/Shougo/unite.vim.git) with [vim-unite-giti](https://github.com/kmnk/vim-unite-giti.git)
 
-### Dot block support
+### Dot graph support
 
  - [graphviz](http://www.graphviz.org)
 
-### Diag block support
+### Diag-family graphs support
 
  - [blockdiag](http://blockdiag.com/en/blockdiag/index.html)
  - [seqdiag](http://blockdiag.com/en/seqdiag/index.html)
  - [actdiag](http://blockdiag.com/en/actdiag/index.html)
  - [nwdiag](http://blockdiag.com/en/nwdiag/index.html)
 
+### R graph support
+
+ - [R](http://r-project.org)
+
 ### Konqueror
 
- - Konqueror *4.13.0*
+ - Konqueror (tested with version *4.13.0*)
  - python2 dbus
 
 ### Firefox
@@ -145,7 +312,8 @@ endif
  - `pandoc` to convert MarkDown document to HTML
 
     - custom filter to create a `graphviz` graphs from *dot* code blocks
-    - custom filter to create a `blockdiag`, `seqdiag`, `actdiag`, `nwdiag` graphs from *blockdiag*, *seqdiag*, *actdiag*, *nwdiag* blocks
+    - custom filter to create a `blockdiag`, `seqdiag`, `actdiag`, `nwdiag`, `packetdiag`, `rackdiag` graphs from *blockdiag*, *seqdiag*, *actdiag*, *nwdiag*, *packetdiag*, *rackdiag* blocks
+    - custom filter to create a `R` generated graphs from *R* code blocks
     - custom filter to replace relative paths to images to absolute paths
 
     - Konqueror

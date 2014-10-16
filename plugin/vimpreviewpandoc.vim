@@ -192,21 +192,25 @@ def FindPosition():
     else:
         return False, "", 0
 
+# The realpath.py filter must be last!
 def get_filters(swd):
-    return [ "--filter=" +swd+"/graphviz.py" \
+    return [ "--filter="+swd+"/graphviz.py" \
            , "--filter="+swd+"/blockdiag.py" \
-           , "--filter="+swd+"/realpath.py"]
+           , "--filter="+swd+"/R.py" \
+           , "--filter="+swd+"/realpath.py" ]
 
 def pandoc(cwd, swd, buffer):
     swd = os.path.join(swd, "plugin")
     cmd = ["pandoc"] + get_filters(swd) + ["--number-section"]
-    p = subprocess.Popen(cmd, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, \
+    p = subprocess.Popen(cmd, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, \
             close_fds=True, cwd=cwd)
     for l in buffer:
         p.stdin.write(l)
         p.stdin.write("\n")
     p.stdin.close()
     data = p.stdout.read().decode("utf8")
+    sys.stderr.write(p.stderr.read())
+
     return data
 
 class PreviewThread(threading.Thread):

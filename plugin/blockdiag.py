@@ -2,7 +2,7 @@
 
 """
 Pandoc filter to process code blocks with class "blockdiag", "seqdiag",
-"actdiag", "nwdiag" into generated images.
+"actdiag", "nwdiag", "packetdiag", "rackdiag" into generated images.
 """
 
 import subprocess
@@ -24,12 +24,12 @@ def save(data):
     return name
 
 def isDiag(classes):
-    for i in ["blockdiag", "seqdiag", "actdiag", "nwdiag"]:
+    for i in ["blockdiag", "seqdiag", "actdiag", "nwdiag", "packetdiag", "rackdiag"]:
         if i in classes:
             return True, i
     return False, ""
 
-def blockdiag(key, value, format, meta):
+def blockdiag(key, value, fmt, meta):
   if key == 'CodeBlock':
     [[ident,classes,keyvals], code] = value
     caption = ""

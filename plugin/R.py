@@ -1,8 +1,8 @@
 #!/usr/bin/env python2
 
 """
-Pandoc filter to process code blocks with class "dot" into
-graphviz-generated images.
+Pandoc filter to process code blocks with class "R" into
+R-generated images.
 """
 
 import subprocess
@@ -28,11 +28,11 @@ def pipe(cmd, data):
 
 def graphviz(key, value, fmt, meta):
   if key == 'CodeBlock':
-    [[ident,classes,keyvals], code] = value
+    [[ident,classes,keyvals], raw_code] = value
     caption = ""
-    if "dot" in classes:
+    if "R" in classes:
       path = os.path.dirname(os.path.abspath(__file__))
-      filename = sha1(code)
+      filename = sha1(raw_code)
       alt = Str(caption)
       tit = ""
       src = imagedir + '/' + filename + '.png'
@@ -41,11 +41,11 @@ def graphviz(key, value, fmt, meta):
             os.mkdir(imagedir)
         except OSError:
             pass
-        data, err = pipe(["dot", "-Tpng", "-s100"], code)
+        code = "ppi <- 300\npng('" + src + \
+                "', width=6*ppi, height=6*ppi, res=ppi)\n" + raw_code
+        data, err = pipe(["R", "--no-save"], code)
         if (len(err) > 0):
             return Para([Str(err)])
-        with open(src, 'w') as f:
-          f.write(data)
       return Para([Image([alt], [src,tit])])
 
 if __name__ == "__main__":

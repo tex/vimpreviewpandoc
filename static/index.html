@@ -172,12 +172,18 @@
         }
     }
 
-    function setOutput(val){
+    // TODO: make this user configurable
+    // var g_foldType = "struct" | "stacked"
+    //var g_foldType = "struct";
+    var g_foldType = "stacked";
+
+    function setOutput(val) {
         val = unescape1(val)
         var out = document.getElementById('out');
         out.innerHTML = val;
-        flag_manual = false;
         document.getElementById("mes").style.visibility="hidden";
+        restoreFoldStatuses();
+        setOnClickHandlerToHeaders();
         window.onresize();
     }
 
@@ -203,6 +209,206 @@
         flag_manual = false;
         document.getElementById("mes").style.visibility="hidden";
         setCursor(g_W,g_C);
+    }
+
+    function setOnClickHandlerToHeaders() {
+        var hs = ["H1", "H2", "H3", "H4", "H5", "H6", "H7"];
+        for (var i = 0; i < hs.length; i++) {
+            var es = document.getElementsByTagName(hs[i]);
+            if (es == null)
+                continue;
+            for (var ii = 0; ii < es.length; ii++) {
+                es[ii].addEventListener("click", onClickHandler, false);
+            }
+        }
+    }
+
+    var g_foldStatus = {};
+
+    // merge two objects. usable for "associate arrays"
+    // destination is modified in place and returned
+    // same keys in destination are overwritten by source
+    function merge(d, s) {
+        for (var p in s) {
+            if (s.hasOwnProperty(p)) {
+                d[p] = s[p];
+            }
+        }
+        return d;
+    }
+
+    function getHeaderPath(t) {
+        var p = [];
+        var headerLevel = t.nodeName[1];
+        p.push(t.id);
+        while ((t = t.previousElementSibling)) {
+            if (t.nodeName[0] == "H"
+                    && t.nodeName[1] < headerLevel) {
+                headerLevel = t.nodeName[1];
+                p.push(t.id);
+            }
+        }
+        return p;
+    }
+
+    function saveFoldStatus(t, i) {
+        var p = getHeaderPath(t);
+
+        var obj = Object();
+        obj[p.join("#")] = i;
+
+        merge(g_foldStatus, obj);
+    }
+
+    // manualFold: undefined, true, false
+    // headerLevel: 0 - visible, > 0 - how many times folded
+    // contentLevel: 0 - visible, > 0 - how many times folded
+
+    // t["fold"] = [manualFold, headerLevel, contentLevel];
+
+    function getFoldInfo(t) {
+        var i = t["fold"];
+        if (i == undefined) {
+            return {mf: undefined, hl: 0, cl: 0};
+        } else {
+            return i;
+        }
+    }
+    function setFoldInfo(t, i) {
+        t["fold"] = i;
+        saveFoldStatus(t, i);
+    }
+
+    function toggleStackedFoldInfo(i) {
+        if (i.mf == undefined) {
+            if (i.cl > 0) {
+                i.mf = false;
+            } else {
+                i.mf = true;
+            }
+        } else {
+            i.mf = !i.mf;
+        }
+        if (i.mf) {     // Folded
+            i.hl = 0;
+            i.cl = 1;
+        } else {        // Unfolded
+            i.hl = 0;
+            i.cl = 0;
+        }
+        return i;
+    }
+    function updateStackedFoldInfo(infoClickedHeader, infoHeader) {
+        infoHeader.hl = 0;
+        if (infoClickedHeader.mf) {
+            infoHeader.cl = 1;
+        } else {
+            if (infoHeader.mf) {
+                infoHeader.cl = 1;
+            } else {
+                infoHeader.cl = 0;
+            }
+        }
+        return infoHeader;
+    }
+    function toggleStructFoldInfo(i) {
+        if (i.mf == undefined) {
+            i.mf = true;
+        } else {
+            i.mf = !i.mf;
+        }
+        if (i.mf) {     // Folded
+            i.hl = 0;
+            i.cl = 1;
+        } else {        // Unfolded
+            i.hl = 0;
+            i.cl = 0;
+        }
+        return i;
+    }
+    function updateStructFoldInfo(infoClickedHeader, infoHeader) {
+        if (infoClickedHeader.mf) {
+            infoHeader.hl += 1;
+            infoHeader.cl += 1;
+        } else {
+            infoHeader.hl -= 1;
+            infoHeader.cl -= 1;
+        }
+        return infoHeader;
+    }
+    function applyFold(t, infoClickedHeader, updateFoldInfo) {
+        var headerLevel = t.nodeName[1];
+        var cl = infoClickedHeader.cl;
+
+        while ((t = t.nextElementSibling)
+                && (t.nodeName[0] != "H" || t.nodeName[1] > headerLevel)) {
+            if (t.nodeName[0] == "H") {
+                infoHeader = updateFoldInfo(infoClickedHeader, getFoldInfo(t));
+                setFoldInfo(t, infoHeader);
+                cl = infoHeader.cl;
+                t.style.display = infoHeader.hl > 0 ? "none" : "";
+            } else {
+                t.style.display = cl > 0 ? "none" : "";
+            }
+        }
+        return t;
+    }
+
+    function runHeaderPath(p, t, f) {
+        if (t == null) {
+            return;
+        }
+        if (p.length == 0) {
+            f(t);
+            return;
+        }
+        var id = p.pop();
+        while (t != null) {
+            if (t.id == id) {
+                runHeaderPath(p, t, f);
+                return;
+            }
+            t = t.nextElementSibling;
+        }
+    }
+    function finalElementFunc(i) {
+        return function X(t) {
+            setFoldInfo(t, i);
+            t.style.display = i.hl > 0 ? "none" : "";
+            while ((t = t.nextElementSibling)
+                    && t.nodeName[0] != "H") {
+                t.style.display = i.cl > 0 ? "none" : "";
+            }
+        }
+    }
+    function restoreFoldStatuses() {
+        var foldStatus = g_foldStatus;
+        g_foldStatus = {};
+
+        for (var p in foldStatus) {
+            if (foldStatus.hasOwnProperty(p)) {
+                var i = foldStatus[p];
+                var p = p.split("#");
+                var id = p.pop();
+                runHeaderPath(p, document.getElementById(id), finalElementFunc(i));
+            }
+        }
+    }
+
+    function onClickHandler() {
+        var t = this;
+
+        if (g_foldType == "struct") {
+            var infoClickedHeader = toggleStructFoldInfo(getFoldInfo(t));
+
+            setFoldInfo(t, infoClickedHeader);
+            applyFold(t, infoClickedHeader, updateStructFoldInfo);
+        } else if (g_foldType == "stacked") {
+            var infoClickedHeader = toggleStackedFoldInfo(getFoldInfo(t));
+
+            setFoldInfo(t, infoClickedHeader);
+            applyFold(t, infoClickedHeader, updateStackedFoldInfo);
+        }
     }
 
   </script>

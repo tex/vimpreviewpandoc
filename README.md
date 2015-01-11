@@ -25,6 +25,11 @@ The web browser always shows changed area so you don't need to scroll manually.
 
     `:call VimPreviewPandocConvertTo("docx,html")`
 
+## TODO
+
+ - Add support for http://ditaa.sourceforge.net ascii art image convertor
+ - Add support for http://plantuml.sourceforge.net uml creator
+
 ## Examples
 
 ### *DOT* Graph

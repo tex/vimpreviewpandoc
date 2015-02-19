@@ -160,6 +160,7 @@ def FindPosition():
                 if inBlock:
                     inBlock = not inBlock
                 elif line[0:6] == '```dot' \
+                    or line[0:4] == '```R' \
                     or line[0:11] == '```plantuml' \
                     or line[0:12] == '```blockdiag' \
                     or line[0:10] == '```seqdiag' \

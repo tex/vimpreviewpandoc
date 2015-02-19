@@ -26,7 +26,7 @@ function! vimpreviewpandoc#VimPreviewScrollTo()
     endif
 endfunction
 
-function! VimPreviewPandocConvertTo(exts)
+function! vimpreviewpandoc#VimPreviewPandocConvertTo(exts)
     python ConvertTo(vim.eval("a:exts"))
 endfunction
 

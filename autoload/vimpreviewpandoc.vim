@@ -160,6 +160,7 @@ def FindPosition():
                 if inBlock:
                     inBlock = not inBlock
                 elif line[0:6] == '```dot' \
+                    or line[0:11] == '```plantuml' \
                     or line[0:12] == '```blockdiag' \
                     or line[0:10] == '```seqdiag' \
                     or line[0:10] == '```actdiag' \
@@ -190,6 +191,7 @@ def get_filters(swd):
     return [ "--filter="+swd+"/graphviz.py" \
            , "--filter="+swd+"/blockdiag.py" \
            , "--filter="+swd+"/R.py" \
+           , "--filter="+swd+"/plantuml.py" \
            , "--filter="+swd+"/realpath.py" ]
 
 def pandoc(cwd, swd, buffer):

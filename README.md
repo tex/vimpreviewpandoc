@@ -202,6 +202,22 @@ This *R* code is shown as the following picture in the preview window:
 
 ![](.dot/c060227482573a97936b015961bb7e51b9d7b286.png)
 
+### PlantUML
+
+This *PlantUML* code is shown as the following picture in the preview window:
+
+    ```plantuml
+    @startuml
+    Alice -> Bob: Authentication Request
+    Bob --> Alice: Authentication Response
+
+    Alice -> Bob: Another authentication Request
+    Alice <-- Bob: another authentication Response
+    @enduml
+    ```
+
+![](.dot/dba2905531256f9ebf116f41123f91f40a6e51e9.png)
+
 ## Installation
 
 Install this plugin either manually or using any plugin manager (Vundle, NeoBundle, ...).

@@ -15,6 +15,7 @@ The web browser always shows changed area so you don't need to scroll manually.
     - Generate `dot` graphs with `graphviz`
     - Generate `blockdiag`, `seqdiag`, `actdiag`, `nwdiag`, `packetdiag`, `rackdiag` graphs
     - Generate `R` graphs
+    - Generate PlantUML graphs
 
  - Show structural diff of specified file between specified git revisions
 
@@ -28,7 +29,6 @@ The web browser always shows changed area so you don't need to scroll manually.
 ## TODO
 
  - Add support for http://ditaa.sourceforge.net ascii art image convertor
- - Add support for http://plantuml.sourceforge.net uml creator
 
 ## Examples
 

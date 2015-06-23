@@ -29,6 +29,7 @@ The web browser always shows changed area so you don't need to scroll manually.
 ## TODO
 
  - Add support for http://ditaa.sourceforge.net ascii art image convertor
+ - Decouple `pandoc` plugins to a separate project
 
 ## Examples
 
@@ -259,6 +260,10 @@ Konqueror shows automatically correct preview. With Firefox you have to manually
 ### R graph support
 
  - [R](http://r-project.org)
+
+### PlantUML
+
+ - [PlantUML](https://github.com/plantuml/plantuml)
 
 ### Konqueror
 

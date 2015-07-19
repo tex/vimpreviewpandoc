@@ -272,6 +272,9 @@ EOF
 
 else
 
-echoerr "VimPreviewPandoc: Python support required!"
+if g:vimpreviewpandoc_error_python == 0
+    echoerr "VimPreviewPandoc: Python support required!"
+    let g:vimpreviewpandoc_error_python = 1
+endif
 
 endif

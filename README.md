@@ -15,6 +15,7 @@ The web browser always shows changed area so you don't need to scroll manually.
     - Generate `dot` graphs with `graphviz`
     - Generate `blockdiag`, `seqdiag`, `actdiag`, `nwdiag`, `packetdiag`, `rackdiag` graphs
     - Generate `R` graphs
+    - Generate PlantUML graphs
 
  - Show structural diff of specified file between specified git revisions
 
@@ -28,7 +29,7 @@ The web browser always shows changed area so you don't need to scroll manually.
 ## TODO
 
  - Add support for http://ditaa.sourceforge.net ascii art image convertor
- - Add support for http://plantuml.sourceforge.net uml creator
+ - Decouple `pandoc` plugins to a separate project
 
 ## Examples
 
@@ -202,6 +203,22 @@ This *R* code is shown as the following picture in the preview window:
 
 ![](.dot/c060227482573a97936b015961bb7e51b9d7b286.png)
 
+### PlantUML
+
+This *PlantUML* code is shown as the following picture in the preview window:
+
+    ```plantuml
+    @startuml
+    Alice -> Bob: Authentication Request
+    Bob --> Alice: Authentication Response
+
+    Alice -> Bob: Another authentication Request
+    Alice <-- Bob: another authentication Response
+    @enduml
+    ```
+
+![](.dot/dba2905531256f9ebf116f41123f91f40a6e51e9.png)
+
 ## Installation
 
 Install this plugin either manually or using any plugin manager (Vundle, NeoBundle, ...).
@@ -243,6 +260,10 @@ Konqueror shows automatically correct preview. With Firefox you have to manually
 ### R graph support
 
  - [R](http://r-project.org)
+
+### PlantUML
+
+ - [PlantUML](https://github.com/plantuml/plantuml)
 
 ### Konqueror
 

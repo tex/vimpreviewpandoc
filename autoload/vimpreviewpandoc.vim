@@ -26,7 +26,7 @@ function! vimpreviewpandoc#VimPreviewScrollTo()
     endif
 endfunction
 
-function! VimPreviewPandocConvertTo(exts)
+function! vimpreviewpandoc#VimPreviewPandocConvertTo(exts)
     python ConvertTo(vim.eval("a:exts"))
 endfunction
 
@@ -160,6 +160,8 @@ def FindPosition():
                 if inBlock:
                     inBlock = not inBlock
                 elif line[0:6] == '```dot' \
+                    or line[0:4] == '```R' \
+                    or line[0:11] == '```plantuml' \
                     or line[0:12] == '```blockdiag' \
                     or line[0:10] == '```seqdiag' \
                     or line[0:10] == '```actdiag' \
@@ -190,13 +192,19 @@ def get_filters(swd):
     return [ "--filter="+swd+"/graphviz.py" \
            , "--filter="+swd+"/blockdiag.py" \
            , "--filter="+swd+"/R.py" \
+           , "--filter="+swd+"/plantuml.py" \
            , "--filter="+swd+"/realpath.py" ]
 
 def pandoc(cwd, swd, buffer):
     swd = os.path.join(swd, "plugin")
     cmd = ["pandoc"] + get_filters(swd) + ["--number-section"]
+    su = None
+    if subprocess.mswindows:
+        su = subprocess.STARTUPINFO()
+        su.dwFlags |= subprocess._subprocess.STARTF_USESHOWWINDOW
+        su.wShowWindow = subprocess._subprocess.SW_HIDE
     p = subprocess.Popen(cmd, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, \
-            close_fds=True, cwd=cwd)
+            close_fds=False, cwd=cwd, startupinfo=su)
     for l in buffer:
         p.stdin.write(l)
         p.stdin.write("\n")
@@ -213,13 +221,8 @@ class PreviewThread(threading.Thread):
         self.buffer = []
         for i in xrange(0, len(buffer)):
             self.buffer.append(buffer[i])
-        self.su = None
         self.cwd = cwd
         self.swd = swd
-        if subprocess.mswindows:
-            self.su = subprocess.STARTUPINFO()
-            self.su.dwFlags |= subprocess._subprocess.STARTF_USESHOWWINDOW
-            self.su.wShowWindow = subprocess._subprocess.SW_HIDE
 
     def run(self):
         html = pandoc(self.cwd, self.swd, self.buffer)
@@ -236,7 +239,7 @@ def git_show(cwd, filename, rev):
           , "show" \
           , rev + ":" + filename]
     p = subprocess.Popen(cmd, shell=False, stdin=None, stdout=subprocess.PIPE, \
-            stderr=None, close_fds=True, cwd=cwd)
+            stderr=None, close_fds=False, cwd=cwd)
     return p.stdout.read()
 
 def Diff(filename, fr, to):
@@ -264,7 +267,7 @@ def ConvertTo(exts):
         cmd = ["pandoc"] +get_filters(swd) + \
               [filename, "-o" + filename + "." + ext]
         p = subprocess.Popen(cmd, shell=False, stdin=None, stdout=None, \
-                close_fds=True, cwd=cwd)
+                close_fds=False, cwd=cwd)
         ps.append(p)
     for p in ps:
         p.wait()

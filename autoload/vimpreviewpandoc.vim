@@ -196,24 +196,27 @@ def get_filters(swd):
            , "--filter="+swd+"/realpath.py" ]
 
 def pandoc(cwd, swd, buffer):
-    swd = os.path.join(swd, "plugin")
-    cmd = ["pandoc"] + get_filters(swd) + ["--number-section"]
-    su = None
-    if subprocess.mswindows:
-        su = subprocess.STARTUPINFO()
-        su.dwFlags |= subprocess._subprocess.STARTF_USESHOWWINDOW
-        su.wShowWindow = subprocess._subprocess.SW_HIDE
-    p = subprocess.Popen(cmd, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, \
-            close_fds=False, cwd=cwd, startupinfo=su)
-    for l in buffer:
-        p.stdin.write(l)
-        p.stdin.write("\n")
-    p.stdin.close()
-    data = p.stdout.read().decode("utf8")
-    error = p.stderr.read()
-    sys.stderr.write(error)
+    try:
+        swd = os.path.join(swd, "plugin")
+        cmd = ["pandoc"] + get_filters(swd) + ["--number-section"]
+        su = None
+        if subprocess.mswindows:
+            su = subprocess.STARTUPINFO()
+            su.dwFlags |= subprocess._subprocess.STARTF_USESHOWWINDOW
+            su.wShowWindow = subprocess._subprocess.SW_HIDE
+        p = subprocess.Popen(cmd, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, \
+                close_fds=False, cwd=cwd, startupinfo=su)
+        for l in buffer:
+            p.stdin.write(l)
+            p.stdin.write("\n")
+        p.stdin.close()
+        data = p.stdout.read().decode("utf8")
+        error = p.stderr.read()
+        sys.stderr.write(error)
 
-    return data
+        return data
+    except OSError as e:
+        return "Executable pandoc not found on path"
 
 class PreviewThread(threading.Thread):
     def __init__(self, buffer, swd, cwd):
@@ -275,9 +278,6 @@ EOF
 
 else
 
-if g:vimpreviewpandoc_error_python == 0
-    echoerr "VimPreviewPandoc: Python support required!"
-    let g:vimpreviewpandoc_error_python = 1
-endif
+echoerr "VimPreviewPandoc: This vim has no Python support!"
 
 endif

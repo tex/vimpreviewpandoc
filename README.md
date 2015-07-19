@@ -19,12 +19,12 @@ The web browser always shows changed area so you don't need to scroll manually.
 
  - Show structural diff of specified file between specified git revisions
 
-    - `:call VimPreviewPandocGitDiff(expand("%"), "HEAD~5", "HEAD")`
+    - `:call vimpreviewpandoc#VimPreviewPandocGitDiff(expand("%"), "HEAD~5", "HEAD")`
     - `:Unite giti/log`, a (action), *diff_pandoc_preview*
 
  - Generate output document in specified output format
 
-    `:call VimPreviewPandocConvertTo("docx,html")`
+    - `:call vimpreviewpandoc#VimPreviewPandocConvertTo("docx,html")`
 
 ## TODO
 
@@ -318,7 +318,7 @@ if neobundle#tap("unite.vim")
             return
         endif
 
-        call VimPreviewPandocGitDiff({
+        call vimpreviewpandoc#VimPreviewPandocGitDiff({
                     \   'file' : relative_path,
                     \   'from' : from,
                     \   'to'   : to,

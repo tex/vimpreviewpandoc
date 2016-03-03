@@ -9,14 +9,26 @@ import os
 import sys
 from pandocfilters import toJSONFilter, Str, Para, Image
 
+def realpath1(url):
+    if url.startswith("http:") or url.startswith("https:"):
+        return url
+    else:
+        return os.path.realpath(url)
+
 def realpath(key, value, fmt, meta):
-  if key == 'Image':
-      # There is a bug in pandocfilters that prevents
-      # me to simple do: [[alt],[src,tit]] = value.
-      alt = value[0]
-      src = value[1][0]
-      tit = value[1][1]
-      return Image(alt, [os.path.realpath(src), tit])
+    if key == 'Image':
+         try:
+            # Current version of pandoc has the following Image type
+            [tmp1,tmp2,[url,title]] = value
+            return Image(tmp1, tmp2, [realpath1(url), title])
+         except:
+             try:
+                # Older versions of pandoc had the following Image type
+                 [tmp1,[url,title]] = value
+                 return Image(tmp1, [realpath1(url), title])
+             except:
+                 pass
 
 if __name__ == "__main__":
-  toJSONFilter(realpath)
+    toJSONFilter(realpath)
+

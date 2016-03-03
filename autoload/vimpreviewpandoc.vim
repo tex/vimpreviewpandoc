@@ -50,6 +50,7 @@ try:
     dbus_found = True
 except ImportError:
     dbus_found = False
+    print("VimPreviewPandoc: Python module dbus not found")
 
 ## Konqueror
 
@@ -180,7 +181,7 @@ def FindPosition():
                                                     # is that line a bookmark?
                 continue                            #  skip current line
             count += line.count(wordUnderCursor)
-        # add a one because the cursor's position column always trims the
+        # add one because the cursor's position column always trims the
         # word under cursor so it won't be found with line.count(...)
         count += 1
         return True, wordUnderCursor, count
@@ -212,11 +213,12 @@ def pandoc(cwd, swd, buffer):
         p.stdin.close()
         data = p.stdout.read().decode("utf8")
         error = p.stderr.read()
-        sys.stderr.write(error)
-
-        return data
+        if error:
+            return error
+        else:
+            return data
     except OSError as e:
-        return "Executable pandoc not found on path"
+        return "Executable pandoc not found on path!"
 
 class PreviewThread(threading.Thread):
     def __init__(self, buffer, swd, cwd):

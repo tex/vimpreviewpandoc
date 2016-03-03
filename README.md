@@ -9,7 +9,7 @@ The web browser always shows changed area so you don't need to scroll manually.
 
 ## Features
 
- - Preview your markdown documents with Konqueror or Firefox
+ - Preview your MarkDown documents with Konqueror or Firefox
 
     - Scroll browser's view to show changed area automatically
     - Generate `dot` graphs with `graphviz`
@@ -21,6 +21,8 @@ The web browser always shows changed area so you don't need to scroll manually.
 
     - `:call vimpreviewpandoc#VimPreviewPandocGitDiff(expand("%"), "HEAD~5", "HEAD")`
     - `:Unite giti/log`, a (action), *diff_pandoc_preview*
+
+        Please see [Unite.vim integration] for needed configuration.
 
  - Generate output document in specified output format
 
@@ -225,11 +227,9 @@ Install this plugin either manually or using any plugin manager (Vundle, NeoBund
 
 I also recommend you to install the following plugins to extend pandoc support:
 
-- [vim-pantondoc](https://github.com/vim-pandoc/vim-pantondoc)
+- [vim-pandoc](https://github.com/vim-pandoc/vim-pandoc)
 - [vim-pandoc-syntax](https://github.com/vim-pandoc/vim-pandoc-syntax.git)
 - [vim-pandoc-after](https://github.com/vim-pandoc/vim-pandoc-after.git)
-
-Add `autocmd BufNewFile,BufRead *.md set filetype=pandoc` to your `.vimrc` if not using `vim-pantondoc` which sets it.
 
 Place your VIM on one side of your screen and manually start a web browser on the other side to get productive environment.
 
@@ -238,7 +238,7 @@ Konqueror shows automatically correct preview. With Firefox you have to manually
 ## Dependencies
 
  - VIM with Python2 support
- - pandoc *1.12.3.3*
+ - pandoc *1.12.3.3* and newer
  - pyhton2 [pandocfilters](https://github.com/jgm/pandocfilters)
 
 ### Structural diff support
@@ -267,7 +267,7 @@ Konqueror shows automatically correct preview. With Firefox you have to manually
 
 ### Konqueror
 
- - Konqueror (tested with version *4.13.0*)
+ - Konqueror *4.13.0* and newer
  - python2 dbus
 
 ### Firefox
@@ -318,11 +318,7 @@ if neobundle#tap("unite.vim")
             return
         endif
 
-        call vimpreviewpandoc#VimPreviewPandocGitDiff({
-                    \   'file' : relative_path,
-                    \   'from' : from,
-                    \   'to'   : to,
-                    \ })
+        call vimpreviewpandoc#VimPreviewPandocGitDiff(relative_path, from, to)
     endfunction
 
     call unite#custom#action('giti/log', 'diff_pandoc_preview', s:pandoc_diff_action)
@@ -355,7 +351,7 @@ endif
 
         Both browsers evaluate JavaScript functions `setCursor(word, count)` where word and count is encoded position and `setOutput(html)` where html is output from pandoc
 
- - index.html is empty page with `setCursor(word, count)` `setOutput(html)` functions
+ - index.html is empty page with `setCursor(word, count)` and `setOutput(html)` functions
 
      - `setCursor(word, count)` finds the encoded position and scrolls window to it
      - `setOutput(html)` replaces the content of the `div` with a new one

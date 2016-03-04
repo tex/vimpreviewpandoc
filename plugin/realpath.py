@@ -19,13 +19,13 @@ def realpath(key, value, fmt, meta):
     if key == 'Image':
          try:
             # Current version of pandoc has the following Image type
-            [tmp1,tmp2,[url,title]] = value
-            return Image(tmp1, tmp2, [realpath1(url), title])
+            [attr,inline,[url,title]] = value
+            return Image(attr, inline, [realpath1(url), title])
          except:
              try:
                 # Older versions of pandoc had the following Image type
-                 [tmp1,[url,title]] = value
-                 return Image(tmp1, [realpath1(url), title])
+                 [attr,[url,title]] = value
+                 return Image(attr, [realpath1(url), title])
              except:
                  pass
 

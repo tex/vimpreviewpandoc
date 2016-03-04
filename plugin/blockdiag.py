@@ -10,7 +10,7 @@ import hashlib
 import os
 import sys
 import tempfile
-from pandocfilters import toJSONFilter, Str, Para, Image
+from pandocfilters import toJSONFilter, Str, Para, Image, attributes
 
 def sha1(x):
   return hashlib.sha1(x).hexdigest()
@@ -53,7 +53,15 @@ def blockdiag(key, value, fmt, meta):
         if (len(err) > 0):
             return Para([Str(err)])
         os.remove(tmp)
-      return Para([Image([alt], [src,tit])])
+      try:
+        image = Image(attributes({}), [alt], [src,tit])
+        return Para([image])
+      except:
+        try:
+          image = Image([alt], [src,tit])
+          return Para([image])
+        except:
+          pass
 
 if __name__ == "__main__":
   toJSONFilter(blockdiag)

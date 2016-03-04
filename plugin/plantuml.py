@@ -9,7 +9,7 @@ import subprocess
 import hashlib
 import os
 import sys
-from pandocfilters import toJSONFilter, Str, Para, Image
+from pandocfilters import toJSONFilter, Str, Para, Image, attributes
 
 def sha1(x):
   return hashlib.sha1(x).hexdigest()
@@ -46,7 +46,15 @@ def graphviz(key, value, fmt, meta):
             return Para([Str(err)])
         with open(src, 'w') as f:
           f.write(data)
-      return Para([Image([alt], [src,tit])])
+      try:
+        image = Image(attributes({}), [alt], [src,tit])
+        return Para([image])
+      except:
+        try:
+          image = Image([alt], [src,tit])
+          return Para([image])
+        except:
+          pass
 
 if __name__ == "__main__":
   toJSONFilter(graphviz)

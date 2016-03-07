@@ -44,13 +44,10 @@ import threading
 import htmltreediff
 import imp
 
-try:
-    imp.find_module('dbus')
-    import dbus
-    dbus_found = True
-except ImportError:
-    dbus_found = False
-    print("VimPreviewPandoc: Python module dbus not found")
+## Global variables
+
+konqueror_found = False
+firefox_found = False
 
 ## Konqueror
 
@@ -96,8 +93,6 @@ def EvalJS(dest, js):
     widget = FindWidget(dest)
     return dbus_iface(dest, "/KHTML/%s/widget" % widget, "org.kde.KHTMLPart").evalJS(js)
 
-#################
-
 def konqueror_output(swd, data):
     if (dbus_found != True):
        raise
@@ -123,27 +118,55 @@ def firefox_output(swd, data):
 
 def output(swd, data):
     try:
-        konqueror_output(swd, data)
-    except Exception as e:
-        # print("Konqueror failed", e)
-        try:
+        if konqueror_found == True:
+            konqueror_output(swd, data)
+        elif firefox_found == True:
             firefox_output(swd, data)
-        except Exception as e:
-            # print("Firefox failed", e)
-            pass
+    except:
+        pass
 
 def escape(data):
     return base64.b64encode(data.encode("utf8"))
-
-#################
 
 def get_swd():
     swd = os.path.dirname(os.path.abspath(vim.eval("s:path")))
     return swd
 
+## Initialization
+
+try:
+    imp.find_module('dbus')
+    import dbus
+    dbus_found = True
+    try:
+        konqueror_output(get_swd(), "setOutput('')")
+        konqueror_found = True
+    except:
+        konqueror_found = False
+except ImportError:
+    dbus_found = False
+    print("VimPreviewPandoc: Python module dbus not found")
+
+if konqueror_found == False:
+    try:
+        firefox_output(get_swd(), "setOutput('')")
+        firefox_found = True
+    except:
+        firefox_found = False
+
+if konqueror_found == True:
+    print("VimPreviewPandoc: Found Konqueror!")
+
+firefox_opened = False
+
+if firefox_found == True:
+    curr = os.path.realpath(os.path.join(get_swd(), "static", "index.html"))
+    print("VimPreviewPandoc: Open '"+curr+"' in Firefox!")
+
+##
+
 def ScrollTo():
     F, W, C = FindPosition()
-    # print(F, W, C)
     if F:
         W = base64.b64encode(W)
         output(get_swd(), "setCursor('" + W + "', " + str(C) + ")")

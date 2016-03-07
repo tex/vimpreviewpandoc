@@ -22,7 +22,7 @@ The web browser always shows changed area so you don't need to scroll manually.
     - `:call vimpreviewpandoc#VimPreviewPandocGitDiff(expand("%"), "HEAD~5", "HEAD")`
     - `:Unite giti/log`, a (action), *diff_pandoc_preview*
 
-        Please see [Unite.vim integration] for needed configuration.
+        Please see [Unite.vim integration] for required configuration.
 
  - Generate output document in specified output format
 

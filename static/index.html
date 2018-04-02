@@ -24,15 +24,12 @@
     hr { display: block; height: 2px; border: 0; border-top: 1px solid #aaa;border-bottom: 1px solid #eee; margin: 1em 0; padding: 0; }
 
     pre, code{
-      color: #000;
       font-family: monospace;
       font-size: 0.88em;
-      border-radius:3px;
-      background-color: #F8F8F8;
-      border: 1px solid #CCC;
     }
-    pre { white-space: pre; white-space: pre-wrap; word-wrap: break-word; padding: 5px;}
-    pre code { border: 0px !important; background: transparent !important; line-height: 1.3em; }
+    pre { white-space: pre; white-space: pre-wrap; word-wrap: break-word;}
+    pre code { border: 0px !important; background: transparent !important; }
+
     sub, sup { font-size: 75%; line-height: 0; position: relative; vertical-align: baseline; }
     sup { top: -0.5em; }
     sub { bottom: -0.25em; }
@@ -174,7 +171,7 @@
 
     // TODO: make this user configurable
     // var g_foldType = "struct" | "stacked"
-    //var g_foldType = "struct";
+    // var g_foldType = "struct";
     var g_foldType = "stacked";
 
     function setOutput(val) {

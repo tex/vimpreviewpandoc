@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
 """
-Pandoc filter to process code blocks with class "dot" into
-plantuml-generated images.
+Pandoc filter to process code blocks with class "ditaa".
 """
 
 import subprocess
 import hashlib
 import os
 import sys
+import tempfile
 from pandocfilters import toJSONFilter, Str, Para, Image, attributes, get_value, get_caption
 
 def sha1(x):
@@ -16,20 +16,16 @@ def sha1(x):
 
 imagedir = ".dot"
 
-def pipe(cmd, data):
-    p = subprocess.Popen(cmd, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
-    p.stdin.write(data.encode("utf-8"))
-    p.stdin.close()
-    data = p.stdout.read()
-    p.stdout.close()
-    err = p.stderr.read().decode("utf-8")
-    p.stderr.close()
-    return data, err
+def save(data):
+    fd, name = tempfile.mkstemp()
+    os.write(fd, data.encode("utf-8"))
+    os.close(fd)
+    return name
 
-def plantuml(key, value, fmt, meta):
+def ditaa(key, value, fmt, meta):
   if key == 'CodeBlock':
     [[ident,classes,keyvals], code] = value
-    if "plantuml" in classes:
+    if "ditaa" in classes:
       caption, typef, keyvals = get_caption(keyvals)
       path = os.path.dirname(os.path.abspath(__file__))
       filename = sha1(code)
@@ -39,11 +35,14 @@ def plantuml(key, value, fmt, meta):
             os.mkdir(imagedir)
         except OSError:
             pass
-        data, err = pipe(["plantuml", "-pipe", "-Tpng"], code)
+        tmp = save(code)
+        p = subprocess.Popen(["ditaa", tmp, src],
+                shell=False, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, close_fds=True)
+        err = p.stderr.read().decode("utf-8")
+        p.stderr.close()
         if (len(err) > 0):
             return Para([Str(err)])
-        with open(src, 'wb') as f:
-          f.write(data)
+        os.remove(tmp)
       try:
         image = Image([ident, [], keyvals], caption, [src, typef])
         return Para([image])
@@ -55,4 +54,4 @@ def plantuml(key, value, fmt, meta):
           pass
 
 if __name__ == "__main__":
-  toJSONFilter(plantuml)
+  toJSONFilter(ditaa)

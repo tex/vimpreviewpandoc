@@ -4,23 +4,24 @@
 
 VimPreviewPandoc is VIM plugin that helps you with editing MarkDown-like documents.
 
-Edit your MarkDown documents in VIM and see a nice HTML-based output in Konqueror or Firefox.
+Edit your MarkDown documents in VIM and see a nice HTML-based output in `qutebrowser`.
 The web browser always shows changed area so you don't need to scroll manually.
 
 ## Features
 
- - Preview your MarkDown documents with Konqueror or Firefox
+ - Preview your MarkDown documents with `qutebrowser`
 
     - Scroll browser's view to show changed area automatically
     - Generate `dot` graphs with `graphviz`
     - Generate `blockdiag`, `seqdiag`, `actdiag`, `nwdiag`, `packetdiag`, `rackdiag` graphs
     - Generate `R` graphs
     - Generate PlantUML graphs
+    - Generate ascii art based images with `ditaa`
 
  - Show structural diff of specified file between specified git revisions
 
     - `:call vimpreviewpandoc#VimPreviewPandocGitDiff(expand("%"), "HEAD~5", "HEAD")`
-    - `:Unite giti/log`, a (action), *diff_pandoc_preview*
+    - `:Unite giti/log`, press `a` (action), select `diff_pandoc_preview`
 
         Please see [Unite.vim integration] for required configuration.
 
@@ -30,10 +31,13 @@ The web browser always shows changed area so you don't need to scroll manually.
 
 ## TODO
 
- - Add support for http://ditaa.sourceforge.net ascii art image convertor
  - Decouple `pandoc` plugins to a separate project
 
 ## Examples
+
+### Supports links
+
+[Link to generated image from R](#whatever)
 
 ### *DOT* Graph
 
@@ -160,6 +164,7 @@ This *Packetdiag* code is shown as the following picture in the preview window:
 This *Rackdiag* code is shown as the following picture in the preview window:
 
     ```rackdiag
+
     rackdiag {
       // define height of rack
       16U;
@@ -181,11 +186,13 @@ This *Rackdiag* code is shown as the following picture in the preview window:
 
 This *R* code is shown as the following picture in the preview window:
 
-    ```R
-    y <- c(1,4,9,13,10)
+    ```{.r #whatever width=9 height=6 caption="R generated output"}
+                                  
+    y <- c(1,4,9,13,10)     
     x <- c(1,2,3,4, 5 )
     xx <- seq(1, 5, length.out=250)
-
+           
+          
     plot(x, y)
 
     fit <- lm(y~x)
@@ -193,7 +200,7 @@ This *R* code is shown as the following picture in the preview window:
     lines(xx, predict(fit, data.frame(x=xx)))
     fnc1 <- bquote(y == .(coef(fit)[[2]]) * x + .(coef(fit)[[1]]))
 
-
+             
     fit <- lm(y~poly(x,3, raw = TRUE))
     label2 <- bquote(italic(R)^2 == .(format(summary(fit)$adj.r.squared, digits=4)))
     lines(xx, predict(fit, data.frame(x=xx)))
@@ -203,11 +210,11 @@ This *R* code is shown as the following picture in the preview window:
     legend("topleft", bty="n", legend=as.expression(labels))
     ```
 
-![](.dot/c060227482573a97936b015961bb7e51b9d7b286.png)
+![](.dot/6c2661f7c930d1580fd1a937d73fdf4a98ff3bb6.png)
 
 ### PlantUML
 
-This *PlantUML* code is shown as the following picture in the preview window:
+This *PlantUML* code as the following picture in the preview window:
 
     ```plantuml
     @startuml
@@ -221,9 +228,31 @@ This *PlantUML* code is shown as the following picture in the preview window:
 
 ![](.dot/dba2905531256f9ebf116f41123f91f40a6e51e9.png)
 
+### Ditaa
+
+This *Ditaa* code is shown as the following picture in the preview window:
+
+    ```ditaa
+    +--------+   +-------+    +-------+
+    |        | --+ ditaa +--> |       | 
+    |  Text  |   +-------+    |diagram|
+    |Document|   |!magic!|    |       |
+    |     {d}|   |       |    |       |
+    +---+----+   +-------+    +-------+
+        :                         ^
+        |       Lots of work      |
+        +-------------------------+
+    ```
+
+![](.dot/ae322a2246aab824d3548bbdce54194d469ac5a4.png)
+
 ## Installation
 
-Install this plugin either manually or using any plugin manager (Vundle, NeoBundle, ...).
+Install this plugin either manually or using any plugin manager (Vundle, NeoBundle, Plug...).
+
+This plugin is required for proper work:
+
+- [async.vim](https://github.com/prabirshrestha/async.vim.git)
 
 I also recommend you to install the following plugins to extend pandoc support:
 
@@ -231,19 +260,21 @@ I also recommend you to install the following plugins to extend pandoc support:
 - [vim-pandoc-syntax](https://github.com/vim-pandoc/vim-pandoc-syntax.git)
 - [vim-pandoc-after](https://github.com/vim-pandoc/vim-pandoc-after.git)
 
-Place your VIM on one side of your screen and manually start a web browser on the other side to get productive environment.
-
-Konqueror shows automatically correct preview. With Firefox you have to manually open `static/index.html` for first time.
+Place your VIM on one side of your screen and when `qutebrowser` appears, move it to the other side to get productive environment. `qutebrowser` shows automatically correct preview.
 
 ## Dependencies
 
- - VIM with Python2 support
+ - VIM with python3 support
  - pandoc *1.12.3.3* and newer
  - pyhton2 [pandocfilters](https://github.com/jgm/pandocfilters)
+ - pyhton3 [pandocfilters](https://github.com/jgm/pandocfilters)
 
 ### Structural diff support
 
  - python2 [htmltreediff](https://github.com/PolicyStat/htmltreediff.git)
+
+    `htmltreediff` requires setting of this environment variable to `PYTHONIOENCODING=UTF-8`
+
  - optionally [unite.vim](https://github.com/Shougo/unite.vim.git) with [vim-unite-giti](https://github.com/kmnk/vim-unite-giti.git)
 
 ### Dot graph support
@@ -265,28 +296,26 @@ Konqueror shows automatically correct preview. With Firefox you have to manually
 
  - [PlantUML](https://github.com/plantuml/plantuml)
 
-### Konqueror
+### Ditaa
 
- - Konqueror *4.13.0* and newer
- - python2 dbus
+ - [Ditaa](https://github.com/stathissideris/ditaa.git)
 
-### Firefox
+### Qutebrowser
 
- - Firefox
- - [Remote Control extension](https://addons.mozilla.org/en-US/firefox/addon/remote-control)
+ - [Qutebrowser](https://qutebrowser.org)
 
 ## Unite.vim integration
 
 Add the following code to your *.vimrc* to add *diff_pandoc_preview* action to *vim-unite-giti*'s *giti-log*.
 
 ```vimrc
-if neobundle#tap("unite.vim")
-            \ && neobundle#tap("vim-unite-giti")
-            \ && neobundle#tap("vimpreviewpandoc")
+    if neobundle#tap("unite.vim")
+                \ && neobundle#tap("vim-unite-giti")
+                \ && neobundle#tap("vimpreviewpandoc")
 
-    function! s:is_graph_only_line(candidate)
-        return has_key(a:candidate.action__data, 'hash') ? 0 : 1
-    endfunction
+        function! s:is_graph_only_line(candidate)
+            return has_key(a:candidate.action__data, 'hash') ? 0 : 1
+        endfunction
 
     let s:pandoc_diff_action = {
         \ 'description' : 'pandoc diff with vimpreviewpandoc',
@@ -336,20 +365,15 @@ endif
     - custom filter to create a `graphviz` graphs from *dot* code blocks
     - custom filter to create a `blockdiag`, `seqdiag`, `actdiag`, `nwdiag`, `packetdiag`, `rackdiag` graphs from *blockdiag*, *seqdiag*, *actdiag*, *nwdiag*, *packetdiag*, *rackdiag* blocks
     - custom filter to create a `R` generated graphs from *R* code blocks
+    - custom filter to create a 'plantuml' generated graphics from *planuml* code blocks
+    - custom filter to create a 'ditaa' generated graphics from *ditaa* code blocks
+    - custom filter to fix block code view in `qutebrowser`
     - custom filter to replace relative paths to images to absolute paths
 
-    - Konqueror
+    - qutebrowser
 
-        - `DBUS` to control Konqueror
-        - open `static/index.html` if not already opened
-        - pass pandoc output to the Konqueror using `DBUS` call `org.kde.KHTMLPart.evalJS`
-
-    - Firefox
-
-        - `Remote Control` extension to control Firefox
-        - pass pandoc output to the Firefox using `Remote Control` (TCP socket, default parameters)
-
-        Both browsers evaluate JavaScript functions `setCursor(word, count)` where word and count is encoded position and `setOutput(html)` where html is output from pandoc
+        - `qutebrowser` uses a socket to talk to already running instance
+        - this allows to execute JavaScript on loaded page
 
  - index.html is empty page with `setCursor(word, count)` and `setOutput(html)` functions
 

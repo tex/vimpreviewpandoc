@@ -1,175 +1,137 @@
-" Python support required!
-if has("python")
+if has("python3")
 
-" Make sure it gets loaded.
-py import vim
+let g:vimpreviewpandoc_document = ""
 
-let s:path = expand('<sfile>:p:h')
-
-function! vimpreviewpandoc#VimPreviewPandocGitDiff(file, from, to)
-    python Diff(vim.eval("a:file"), vim.eval("a:from"), vim.eval("a:to"))
+function! s:qutebrowser_set_output(stdout)
+python3 << EOF
+import vim
+import base64
+data = "setOutput('" +
+            \ base64.b64encode(vim.eval("join(a:stdout, '\n')").encode("utf-8")).decode("utf-8") +
+            \ "')"
+vim.command('let cmd = "' + data + '"')
+EOF
+call s:qutebrowser_exec(cmd)
 endfunction
 
-function! vimpreviewpandoc#VimPreviewPandoc(force)
-    if a:force == 1
-        \ || !exists("b:vimpreviewpandoc_changedtick")
+function! s:qutebrowser_set_output_with_log(file, stdout)
+    call writefile(a:stdout, a:file)
+    call s:qutebrowser_set_output(a:stdout)
+endfunction
+
+function! vimpreviewpandoc#VimPreviewPandoc()
+    if !exists('b:vimpreviewpandoc_changedtick')
         \ || b:vimpreviewpandoc_changedtick != b:changedtick
-        python Preview()
+        if g:vimpreviewpandoc_document != expand('%:p')
+            let b:qutebrowser_open = 1
+            let g:vimpreviewpandoc_document = expand('%:p')
+        endif
+        let cmd = s:pandoc_argv() + [expand('%:p')]
+        call s:start(cmd, function('s:qutebrowser_set_output'))
     endif
     let b:vimpreviewpandoc_changedtick = b:changedtick
 endfunction
 
 function! vimpreviewpandoc#VimPreviewScrollTo()
-    if exists("b:vimpreviewpandoc_changedtick")
-        \ && b:vimpreviewpandoc_changedtick == b:changedtick
-        python ScrollTo()
-    endif
-endfunction
-
-function! vimpreviewpandoc#VimPreviewPandocConvertTo(exts)
-    python ConvertTo(vim.eval("a:exts"))
-endfunction
-
-python << EOF
+python3 << EOF
 import vim
-import os
-import sys
+vim.command('let cmd = "' + FindPosition() + '"')
+EOF
+if len(cmd) > 0
+    call s:qutebrowser_exec(cmd)
+endif
+endfunction
+
+function! s:ignore_output(stdout)
+    echo "Done"
+endfunction
+
+function! vimpreviewpandoc#VimPreviewPandocConvertTo(ext)
+    let cmd = s:pandoc_argv() + [expand('%:p'), '-o ' + expand('%:p') + a:ext]
+    call s:start(cmd, function('s:ignore_output'))
+endfunction
+
+function! s:gd1(stdout)
+    let s:gd1_o = a:stdout
+endfunction
+
+function! s:gd2(stdout)
+    let s:gd2_o = a:stdout
+endfunction
+
+
+function! vimpreviewpandoc#VimPreviewPandocGitDiff(file, from, to)
+    let id1 = s:start(['git', 'show', a:from . ':' . a:file], function('s:gd1'))
+    let id2 = s:start(['git', 'show', a:to . ':' . a:file], function('s:gd2'))
+    call async#job#wait([id1, id2])
+    call writefile(s:gd1_o, a:file.'.'.a:from)
+    call writefile(s:gd2_o, a:file.'.'.a:to)
+    let id3 = s:start(s:pandoc_argv() + [a:file.'.'.a:from, '-o'.a:file.'.html.'.a:from], function('s:ignore_output'))
+    let id4 = s:start(s:pandoc_argv() + [a:file.'.'.a:to, '-o'.a:file.'.html.'.a:to], function('s:ignore_output'))
+    call async#job#wait([id3, id4])
+    call s:start(["python", "-m", "htmltreediff.cli", a:file.'.html.'.a:from, a:file.'.html.'.a:to], 
+                \ function('s:qutebrowser_set_output_with_log', [a:file.'.html.'.a:from.'.'.a:to]))
+endfunction
+
+let s:path = expand('<sfile>:p:h').'/..'
+
+function! s:qutebrowser_exec(data)
+    if exists('b:qutebrowser_open')
+        unlet b:qutebrowser_open
+        let argv = ['qutebrowser', ':open '.s:path.'/static/index.html']
+        let res = async#job#start(argv, {})
+        execute 'sleep 1000m'
+    endif
+    let argv = ['qutebrowser', ':jseval --quiet --world 0 '.a:data]
+    let res = async#job#start(argv, {})
+endfunction
+
+let s:output = []
+let s:error = 0
+
+function! s:on_stderr(job_id, data, event_type)
+    let s:output = s:output + a:data
+    let s:error = 1
+endfunction
+
+function! s:on_stdout(job_id, data, event_type)
+    let s:output = s:output + a:data
+endfunction
+
+function! s:on_exit(callback, job_id, data, event_type)
+    if s:error == 1
+        echom join(s:output, '\n')
+    else
+        call a:callback(s:output)
+    endif
+    let s:output = []
+endfunction
+
+function! s:pandoc_argv()
+    return ['pandoc',
+                \ '--ascii',
+                \ '--filter='.s:path.'/plugin/graphviz.py',
+                \ '--filter='.s:path.'/plugin/blockdiag.py',
+                \ '--filter='.s:path.'/plugin/R.py',
+                \ '--filter='.s:path.'/plugin/plantuml.py',
+                \ '--filter='.s:path.'/plugin/ditaa.py',
+                \ '--filter='.s:path.'/plugin/pre.py',
+                \ '--filter='.s:path.'/plugin/realpath.py',
+                \ '--number-section']
+endfunction
+
+function! s:start(cmd, callback)
+    let s:output = []
+    let s:error = 0
+    return async#job#start(a:cmd, {
+                \ 'on_exit': function('s:on_exit', [a:callback]),
+                \ 'on_stdout': function('s:on_stdout'),
+                \ 'on_stderr': function('s:on_stderr'),
+                \ })
+endfunction
+
+python3 << EOF
 import base64
-import subprocess
-import time
-import socket
-import traceback
-from xml.dom import minidom
-import threading
-import htmltreediff
-import imp
-
-## Global variables
-
-konqueror_found = False
-firefox_found = False
-
-## Konqueror
-
-def dbus_iface(dest, path, iface):
-    bus = dbus.SessionBus()
-    remote = bus.get_object(dest, path)
-    return dbus.Interface(remote, iface)
-
-def FindDest():
-    names = dbus_iface("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus").ListNames()
-    for i in names:
-       if i.startswith("org.kde.konqueror"):
-           xml = dbus_iface(i, "/", "org.freedesktop.DBus.Introspectable").Introspect()
-           dom = minidom.parseString(xml)
-           nodes = dom.getElementsByTagName("node")[0].getElementsByTagName("node")
-           for node in nodes:
-               if node.attributes["name"].value == "KHTML":
-                   return i
-    raise Exception("Konqueror not running")
-
-def FindWidget(dest):
-    xml = dbus_iface(dest, "/KHTML", "org.freedesktop.DBus.Introspectable").Introspect()
-    dom = minidom.parseString(xml)
-    nodes = dom.getElementsByTagName("node")[0].getElementsByTagName("node")
-    for node in nodes:
-        i = node.attributes["name"].value
-        xml = dbus_iface(dest, "/KHTML/%s" % i, "org.freedesktop.DBus.Introspectable").Introspect()
-        dom = minidom.parseString(xml)
-        nodes = dom.getElementsByTagName("node")[0].getElementsByTagName("node")
-        for node in nodes:
-            if node.attributes["name"].value == "widget":
-                return i
-    return False
-
-def OpenUrl(dest, path):
-    dbus_iface(dest, "/konqueror/MainWindow_1", "org.kde.Konqueror.MainWindow").openUrl(path, False)
-
-def CurrentUrl(dest):
-    location = EvalJS(dest, "window.location.href")
-    return location
-
-def EvalJS(dest, js):
-    widget = FindWidget(dest)
-    return dbus_iface(dest, "/KHTML/%s/widget" % widget, "org.kde.KHTMLPart").evalJS(js)
-
-def konqueror_output(swd, data):
-    if (dbus_found != True):
-       raise
-    curr = os.path.realpath( \
-              os.path.join(swd, \
-                 "static", "index.html"))
-    dest = FindDest()
-    if CurrentUrl(dest) != "file://" + curr:
-        OpenUrl(dest, curr)
-        time.sleep(1)
-    EvalJS(dest, data)
-
-## Firefox
-
-def firefox_output(swd, data):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('127.0.0.1', 32000))
-    s.send(data)
-    data = s.recv(2048)
-    s.close()
-
-## Common
-
-def output(swd, data):
-    try:
-        if konqueror_found == True:
-            konqueror_output(swd, data)
-        elif firefox_found == True:
-            firefox_output(swd, data)
-    except:
-        pass
-
-def escape(data):
-    return base64.b64encode(data.encode("utf8"))
-
-def get_swd():
-    swd = os.path.dirname(os.path.abspath(vim.eval("s:path")))
-    return swd
-
-## Initialization
-
-try:
-    imp.find_module('dbus')
-    import dbus
-    dbus_found = True
-    try:
-        konqueror_output(get_swd(), "setOutput('')")
-        konqueror_found = True
-    except:
-        konqueror_found = False
-except ImportError:
-    dbus_found = False
-    print("VimPreviewPandoc: Python module dbus not found")
-
-if konqueror_found == False:
-    try:
-        firefox_output(get_swd(), "setOutput('')")
-        firefox_found = True
-    except:
-        firefox_found = False
-
-if konqueror_found == True:
-    print("VimPreviewPandoc: Found Konqueror!")
-
-firefox_opened = False
-
-if firefox_found == True:
-    curr = os.path.realpath(os.path.join(get_swd(), "static", "index.html"))
-    print("VimPreviewPandoc: Open '"+curr+"' in Firefox!")
-
-##
-
-def ScrollTo():
-    F, W, C = FindPosition()
-    if F:
-        W = base64.b64encode(W)
-        output(get_swd(), "setCursor('" + W + "', " + str(C) + ")")
 
 def FindPosition():
     wordUnderCursor = vim.eval("expand('<cword>')")
@@ -178,13 +140,14 @@ def FindPosition():
         (row, col) = vim.current.window.cursor
         count = 0
         inBlock = False
-        for i in xrange(0, row):
+        for i in range(0, row):
             line = cb[i]
             if line[0:3] == '```':
                 if inBlock:
                     inBlock = not inBlock
                 elif line[0:6] == '```dot' \
                     or line[0:4] == '```R' \
+                    or line[0:8] == '```ditaa' \
                     or line[0:11] == '```plantuml' \
                     or line[0:12] == '```blockdiag' \
                     or line[0:10] == '```seqdiag' \
@@ -193,7 +156,7 @@ def FindPosition():
                     inBlock = True
             if i == row - 1:                # last line?
                 if inBlock:                 #  in a block?
-                    return False, "", 0     #   not found
+                    return ""               #   not found
                 line = line[0:col]          #  limit line to cursor's position column
             else:
                 if inBlock:                 #  in a block?
@@ -207,102 +170,14 @@ def FindPosition():
         # add one because the cursor's position column always trims the
         # word under cursor so it won't be found with line.count(...)
         count += 1
-        return True, wordUnderCursor, count
+        return "setCursor('" +
+                    \  base64.b64encode(
+                    \   wordUnderCursor.encode("utf-8")).decode("utf-8") +
+                    \  "', " + str(count) + ")" 
     else:
-        return False, "", 0
-
-# The realpath.py filter must be last!
-def get_filters(swd):
-    return [ "--filter="+swd+"/graphviz.py" \
-           , "--filter="+swd+"/blockdiag.py" \
-           , "--filter="+swd+"/R.py" \
-           , "--filter="+swd+"/plantuml.py" \
-           , "--filter="+swd+"/realpath.py" ]
-
-def pandoc(cwd, swd, buffer):
-    try:
-        swd = os.path.join(swd, "plugin")
-        cmd = ["pandoc"] + get_filters(swd) + ["--number-section"]
-        su = None
-        if subprocess.mswindows:
-            su = subprocess.STARTUPINFO()
-            su.dwFlags |= subprocess._subprocess.STARTF_USESHOWWINDOW
-            su.wShowWindow = subprocess._subprocess.SW_HIDE
-        p = subprocess.Popen(cmd, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, \
-                close_fds=False, cwd=cwd, startupinfo=su)
-        for l in buffer:
-            p.stdin.write(l)
-            p.stdin.write("\n")
-        p.stdin.close()
-        data = p.stdout.read().decode("utf8")
-        error = p.stderr.read()
-        if error:
-            return error
-        else:
-            return data
-    except OSError as e:
-        return "Executable pandoc not found on path!"
-
-class PreviewThread(threading.Thread):
-    def __init__(self, buffer, swd, cwd):
-        threading.Thread.__init__(self)
-        self.buffer = []
-        for i in xrange(0, len(buffer)):
-            self.buffer.append(buffer[i])
-        self.cwd = cwd
-        self.swd = swd
-
-    def run(self):
-        html = pandoc(self.cwd, self.swd, self.buffer)
-        output(self.swd, "setOutput('" + escape(html) + "')")
-
-def Preview():
-    thread = PreviewThread(vim.current.buffer \
-                          , get_swd() \
-                          , os.path.dirname(os.path.abspath(vim.eval("expand('%p')"))))
-    thread.start()
-
-def git_show(cwd, filename, rev):
-    cmd = ["git" \
-          , "show" \
-          , rev + ":" + filename]
-    p = subprocess.Popen(cmd, shell=False, stdin=None, stdout=subprocess.PIPE, \
-            stderr=None, close_fds=False, cwd=cwd)
-    return p.stdout.read()
-
-def Diff(filename, fr, to):
-    try:
-        swd = get_swd()
-        cwd = os.path.dirname(os.path.abspath(filename))
-        old = git_show(cwd, filename, fr)
-        old = old.split("\n")
-        old = pandoc(cwd, swd, old)
-        new = git_show(cwd, filename, to)
-        new = new.split("\n")
-        new = pandoc(cwd, swd, new)
-        diff = htmltreediff.html.diff(old, new)
-        output(swd, "setOutput('" + escape(diff) + "')")
-        print("Done!")
-    except Exception as e:
-        print("Diff failed", e)
-
-def ConvertTo(exts):
-    filename = os.path.abspath(vim.eval("expand('%p')"))
-    cwd = os.path.dirname(filename)
-    swd = os.path.join(get_swd(), "plugin")
-    ps = []
-    for ext in exts.split(","):
-        cmd = ["pandoc"] +get_filters(swd) + \
-              [filename, "-o" + filename + "." + ext]
-        p = subprocess.Popen(cmd, shell=False, stdin=None, stdout=None, \
-                close_fds=False, cwd=cwd)
-        ps.append(p)
-    for p in ps:
-        p.wait()
+        return ""
 EOF
 
 else
-
-echoerr "VimPreviewPandoc: This vim has no Python support!"
-
+echoerr "VimPreviewPandoc: Python3 support required!"
 endif

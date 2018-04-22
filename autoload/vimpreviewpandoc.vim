@@ -2,21 +2,19 @@ if has("python3")
 
 let g:vimpreviewpandoc_document = ""
 
-function! s:qutebrowser_set_output(stdout)
+function! s:qutebrowser_set_output(data)
 python3 << EOF
 import vim
 import base64
-data = "setOutput('" +
-            \ base64.b64encode(vim.eval("join(a:stdout, '\n')").encode("utf-8")).decode("utf-8") +
-            \ "')"
-vim.command('let cmd = "' + data + '"')
+data = "'" + base64.b64encode(vim.eval("join(a:data, '\n')").encode("utf-8")).decode("utf-8") + "'"
+vim.command('let cmd = "setOutput(' + data + ')"')
 EOF
 call s:qutebrowser_exec(cmd)
 endfunction
 
-function! s:qutebrowser_set_output_with_log(file, stdout)
-    call writefile(a:stdout, a:file)
-    call s:qutebrowser_set_output(a:stdout)
+function! s:qutebrowser_set_output_with_log(file, data)
+    call writefile(a:data, a:file)
+    call s:qutebrowser_set_output(a:data)
 endfunction
 
 function! vimpreviewpandoc#VimPreviewPandoc()
@@ -27,7 +25,7 @@ function! vimpreviewpandoc#VimPreviewPandoc()
             let g:vimpreviewpandoc_document = expand('%:p')
         endif
         let cmd = s:pandoc_argv() + [expand('%:p')]
-        call s:start(cmd, function('s:qutebrowser_set_output'))
+        call s:start(cmd, function('s:qutebrowser_set_output_with_log', [expand('%:p').".html"]))
     endif
     let b:vimpreviewpandoc_changedtick = b:changedtick
 endfunction
@@ -42,32 +40,31 @@ if len(cmd) > 0
 endif
 endfunction
 
-function! s:ignore_output(stdout)
-    echo "Done"
+function! s:ignore_output(message, data)
+    if len(a:message) > 0
+        echo a:message
+    endif
 endfunction
 
 function! vimpreviewpandoc#VimPreviewPandocConvertTo(ext)
     let cmd = s:pandoc_argv() + [expand('%:p'), '-o ' + expand('%:p') + a:ext]
-    call s:start(cmd, function('s:ignore_output'))
+    call s:start(cmd, function('s:ignore_output', ["Pandoc conversion finished!"]))
 endfunction
 
-function! s:gd1(stdout)
-    let s:gd1_o = a:stdout
+function! s:assign_output(data) dict
+    let self.data = a:data
 endfunction
-
-function! s:gd2(stdout)
-    let s:gd2_o = a:stdout
-endfunction
-
 
 function! vimpreviewpandoc#VimPreviewPandocGitDiff(file, from, to)
-    let id1 = s:start(['git', 'show', a:from . ':' . a:file], function('s:gd1'))
-    let id2 = s:start(['git', 'show', a:to . ':' . a:file], function('s:gd2'))
+    let l:from_o = { 'data': [] }
+    let l:to_o = { 'data': [] }
+    let id1 = s:start(['git', 'show', a:from . ':' . a:file], function('s:assign_output', [], l:from_o))
+    let id2 = s:start(['git', 'show', a:to . ':' . a:file], function('s:assign_output', [], l:to_o))
     call async#job#wait([id1, id2])
-    call writefile(s:gd1_o, a:file.'.'.a:from)
-    call writefile(s:gd2_o, a:file.'.'.a:to)
-    let id3 = s:start(s:pandoc_argv() + [a:file.'.'.a:from, '-o'.a:file.'.html.'.a:from], function('s:ignore_output'))
-    let id4 = s:start(s:pandoc_argv() + [a:file.'.'.a:to, '-o'.a:file.'.html.'.a:to], function('s:ignore_output'))
+    call writefile(l:from_o.data, a:file.'.'.a:from)
+    call writefile(l:to_o.data, a:file.'.'.a:to)
+    let id3 = s:start(s:pandoc_argv() + [a:file.'.'.a:from, '-o'.a:file.'.html.'.a:from], function('s:ignore_output', [""]))
+    let id4 = s:start(s:pandoc_argv() + [a:file.'.'.a:to, '-o'.a:file.'.html.'.a:to], function('s:ignore_output', [""]))
     call async#job#wait([id3, id4])
     call s:start(["python", "-m", "htmltreediff.cli", a:file.'.html.'.a:from, a:file.'.html.'.a:to], 
                 \ function('s:qutebrowser_set_output_with_log', [a:file.'.html.'.a:from.'.'.a:to]))
@@ -86,26 +83,6 @@ function! s:qutebrowser_exec(data)
     let res = async#job#start(argv, {})
 endfunction
 
-let s:output = []
-let s:error = 0
-
-function! s:on_stderr(job_id, data, event_type)
-    let s:output = s:output + a:data
-    let s:error = 1
-endfunction
-
-function! s:on_stdout(job_id, data, event_type)
-    let s:output = s:output + a:data
-endfunction
-
-function! s:on_exit(callback, job_id, data, event_type)
-    if s:error == 1
-        echom join(s:output, '\n')
-    else
-        call a:callback(s:output)
-    endif
-    let s:output = []
-endfunction
 
 function! s:pandoc_argv()
     return ['pandoc',
@@ -120,9 +97,43 @@ function! s:pandoc_argv()
                 \ '--number-section']
 endfunction
 
+let s:jobs = {}
+
+function! s:new_job(job_id)
+    let s:jobs[a:job_id] = {
+                \ 'data' : [],
+                \ 'error' : 0
+                \ }
+endfunction
+
+function! s:on_stderr(job_id, data, event_type)
+    if !has_key(s:jobs, a:job_id)
+        call s:new_job(a:job_id)
+    endif
+    let s:jobs[a:job_id].data += a:data
+    let s:jobs[a:job_id].error = 1
+endfunction
+
+function! s:on_stdout(job_id, data, event_type)
+    if !has_key(s:jobs, a:job_id)
+        call s:new_job(a:job_id)
+    endif
+    let s:jobs[a:job_id].data += a:data
+endfunction
+
+function! s:on_exit(callback, job_id, data, event_type)
+    if !has_key(s:jobs, a:job_id)
+        call s:new_job(a:job_id)
+    endif
+    if s:jobs[a:job_id].error == 1
+        echom join(s:jobs[a:job_id].data, '\n')
+    else
+        call a:callback(s:jobs[a:job_id].data)
+    endif
+    call remove(s:jobs, a:job_id)
+endfunction
+
 function! s:start(cmd, callback)
-    let s:output = []
-    let s:error = 0
     return async#job#start(a:cmd, {
                 \ 'on_exit': function('s:on_exit', [a:callback]),
                 \ 'on_stdout': function('s:on_stdout'),
@@ -170,10 +181,9 @@ def FindPosition():
         # add one because the cursor's position column always trims the
         # word under cursor so it won't be found with line.count(...)
         count += 1
-        return "setCursor('" +
-                    \  base64.b64encode(
+        return "setCursor('" + base64.b64encode(
                     \   wordUnderCursor.encode("utf-8")).decode("utf-8") +
-                    \  "', " + str(count) + ")" 
+                    \  "', " + str(count) + ")"
     else:
         return ""
 EOF

@@ -11,6 +11,8 @@
 
     img{max-width:100%;}
 
+    pre{line-height:0em;}
+
     h1,h2,h3,h4,h5,h6{font-weight:normal;color:#111;line-height:1em;}
     h4,h5,h6{ font-weight: bold; }
     h1{ font-size:2.5em; }
@@ -23,12 +25,6 @@
     blockquote{color:#666666;margin:0;padding-left: 3em;border-left: 0.5em #EEE solid;}
     hr { display: block; height: 2px; border: 0; border-top: 1px solid #aaa;border-bottom: 1px solid #eee; margin: 1em 0; padding: 0; }
 
-    pre, code{
-      font-family: monospace;
-      font-size: 0.88em;
-    }
-    pre { white-space: pre; white-space: pre-wrap; word-wrap: break-word;}
-    pre code { border: 0px !important; background: transparent !important; }
 
     sub, sup { font-size: 75%; line-height: 0; position: relative; vertical-align: baseline; }
     sup { top: -0.5em; }
@@ -43,8 +39,22 @@
 
     ins { text-decoration: none; color: green }
     del { text-decoration: none; color: red }
+
     ins a{ color: green; text-decoration:none; }
     del a{ color: red; text-decoration: none; }
+
+    ins h1 {color: green; text-decoration: none;}
+    del h1 {color: red; text-decoration: none;}
+    ins h2 {color: green; text-decoration: none;}
+    del h2 {color: red; text-decoration: none;}
+    ins h3 {color: green; text-decoration: none;}
+    del h3 {color: red; text-decoration: none;}
+    ins h4 {color: green; text-decoration: none;}
+    del h4 {color: red; text-decoration: none;}
+    ins h5 {color: green; text-decoration: none;}
+    del h5 {color: red; text-decoration: none;}
+    ins h6 {color: green; text-decoration: none;}
+    del h6 {color: red; text-decoration: none;}
 
     #page { position: relative; }
     #mes { position: fixed; margin-right: -40px; visibility: hidden; }
@@ -55,26 +65,29 @@
 
     var flag_manual = false;
 
-    var smooth_scroll_to = function(target, duration) {
-        target = Math.round(target);
-        duration = Math.round(duration);
-        if (duration === 0) {
-            window.scrollTo(0, target);
+    var smooth_scroll_to = function(target, duration)
+    {
+        target = Math.round(target)
+        duration = Math.round(duration)
+        if (duration === 0)
+        {
+            window.scrollTo(0, target)
             return
         }
 
-        var start_time = Date.now();
-        var end_time = start_time + duration;
+        var start_time = Date.now()
+        var end_time = start_time + duration
 
         var start_top = document.documentElement.scrollTop || document.body.scrollTop
-        var distance = target - start_top;
+        var distance = target - start_top
 
         // based on http://en.wikipedia.org/wiki/Smoothstep
-        var smooth_step = function(start, end, point) {
-            if(point <= start) { return 0; }
-            if(point >= end) { return 1; }
-            var x = (point - start) / (end - start); // interpolation
-            return x*x*(3 - 2*x);
+        var smooth_step = function(start, end, point)
+        {
+            if (point <= start) { return 0 }
+            if (point >= end) { return 1 }
+            var x = (point - start) / (end - start) // interpolation
+            return x * x * (3 - 2 * x)
         }
 
         // This is to keep track of where the window's scrollTop is
@@ -82,67 +95,80 @@
         var previous_top = document.documentElement.scrollTop || document.body.scrollTop
 
         // This is like a think function from a game loop
-        var scroll_frame = function() {
+        var scroll_frame = function()
+        {
             var tmp = document.documentElement.scrollTop || document.body.scrollTop
-            if(tmp != previous_top) {
-                return;
+            if (tmp != previous_top)
+            {
+                return
             }
 
             // set the scrollTop for this frame
-            var now = Date.now();
-            var point = smooth_step(start_time, end_time, now);
-            var frameTop = Math.round(start_top + (distance * point));
-            window.scrollTo(0, frameTop);
+            var now = Date.now()
+            var point = smooth_step(start_time, end_time, now)
+            var frameTop = Math.round(start_top + (distance * point))
+            window.scrollTo(0, frameTop)
 
             // check if we're done!
-            if(now >= end_time) {
-                return;
+            if (now >= end_time)
+            {
+                return
             }
 
             // If we were supposed to scroll but didn't, then we
             // probably hit the limit, so consider it done; not
             // interrupted.
             var tmp = document.documentElement.scrollTop || document.body.scrollTop
-            if(tmp === previous_top
-                && tmp !== frameTop) {
-                return;
+            if (tmp === previous_top
+                && tmp !== frameTop)
+            {
+                return
             }
-            previous_top = tmp;
+            previous_top = tmp
 
             // schedule next frame for execution
-            setTimeout(scroll_frame, 0);
+            setTimeout(scroll_frame, 0)
         }
 
         // boostrap the animation process
-        setTimeout(scroll_frame, 0);
+        setTimeout(scroll_frame, 0)
     }
-
-    var last_html = undefined;
 
     /** Function count the occurrences of substring in a string;
      * @param {String} string   Required. The string;
      * @param {String} subString    Required. The string to search for;
      * @param {Boolean} allowOverlapping    Optional. Default: false;
      */
-    function occurrences(string, subString, allowOverlapping){
+    function occurrences(string, subString, allowOverlapping)
+    {
+        string += ""
+        subString += ""
 
-        string+=""; subString+="";
-        if(subString.length<=0) return string.length+1;
+        if (subString.length <= 0)
+            return string.length + 1
 
-        var n=0, pos=0;
-        var step=(allowOverlapping)?(1):(subString.length);
+        var n = 0
+        var pos = 0
+        var step = (allowOverlapping) ? (1) : (subString.length)
 
-        while(true){
-            pos=string.indexOf(subString,pos);
-            if(pos>=0){
-                n++; pos+=step;
-            } else
-                break;
+        while (true)
+        {
+            pos = string.indexOf(subString,pos)
+            if (pos >= 0)
+            {
+                n++
+                pos += step
+            }
+            else
+            {
+                break
+            }
         }
-        return(n);
+        return (n)
     }
 
-    function unescape1(data) {
+    function unescape(data)
+    {
         return decodeURIComponent(escape(window.atob(data)))
     }
 
@@ -151,260 +177,178 @@
 
     /* TODO: highligh the W */
     /* TODO: scroll to W exactly */
-    function setCursor(W, C) {
-        if (flag_manual) {
-            g_W = W;
-            g_C = C;
-            return;
+    function setCursor(W, C)
+    {
+        if (flag_manual)
+        {
+            g_W = W
+            g_C = C
+            return
         }
-        W = unescape1(W);
-        var d = document.getElementById('out');
-        for (var i = 0; i < d.childNodes.length; i++) {
-            f = occurrences(d.childNodes[i].textContent, W, false);
-            C = C - f;
-            if (C <= 0) {
+        W = unescape(W)
+        var d = document.getElementById('out')
+        for (var i = 0; i < d.childNodes.length; i++)
+        {
+            f = occurrences(d.childNodes[i].textContent, W, false)
+            C = C - f
+            if (C <= 0)
+            {
                 smooth_scroll_to(d.childNodes[i].offsetTop - window.outerHeight / 3, 500)
-                return;
+                return
             }
         }
     }
 
-    // TODO: make this user configurable
-    // var g_foldType = "struct" | "stacked"
-    // var g_foldType = "struct";
-    var g_foldType = "stacked";
+    function loop4(node)
+    {
+        var n = []
 
-    function setOutput(val) {
-        val = unescape1(val)
-        var out = document.getElementById('out');
-        out.innerHTML = val;
-        document.getElementById("mes").style.visibility="hidden";
-        restoreFoldStatuses();
-        setOnClickHandlerToHeaders();
-        window.onresize();
+        if (node.nodeName != "INS"
+            && node.nodeName != "DEL"
+            && node.nodeName != "BODY"
+            && node.nodeName != "SCRIPT")
+        {
+            n.push(node)
+        }
+
+        if (node.nodeName[0] == "H")
+        {
+            return n
+        }
+
+        var ns = node.childNodes;
+        for (var i = 0; i < ns.length; i++)
+        {
+            if (!ns[i])
+            {
+                continue
+            }
+            if (ns[i].childNodes.length > 0)
+            {
+                m = loop4(ns[i])
+                for (var j = 0; j < m.length; j++)
+                {
+                    n.push(m[j])
+                }
+            }
+        }
+
+        return n
     }
 
-    document.onwheel = function(x) {
-        if (!flag_manual) {
-            document.getElementById("mes").style.visibility="visible";
-            flag_manual = true;
+    var nodes = []
+
+    function setOutput(val)
+    {
+        val = unescape(val)
+        var out = document.getElementById('out')
+        out.innerHTML = val
+        nodes = loop4(out)
+        document.getElementById("mes").style.visibility="hidden"
+        setOnClickHandlerToHeaders()
+        window.onresize()
+    }
+
+    document.onwheel = function(x)
+    {
+        if (!flag_manual)
+        {
+            document.getElementById("mes").style.visibility="visible"
+            flag_manual = true
         }
     }
-    document.onkeypress = function(x) {
+
+    document.onkeypress = function(x)
+    {
         if (x.keyCode == 40 /*Down*/ || x.keyCode == 38 /*Up*/)
-            if (!flag_manual) {
-                document.getElementById("mes").style.visibility="visible";
-                flag_manual = true;
+        {
+            if (!flag_manual)
+            {
+                document.getElementById("mes").style.visibility="visible"
+                flag_manual = true
             }
+        }
     }
-    window.onresize = function(x) {
+
+    window.onresize = function(x)
+    {
         var mes = document.getElementById("mes");
         mes.style.marginLeft = (document.body.clientWidth - mes.offsetWidth - 30) + "px";
     }
 
-    function scroll_automaticaly() {
-        flag_manual = false;
-        document.getElementById("mes").style.visibility="hidden";
-        setCursor(g_W,g_C);
+    function scroll_automaticaly()
+    {
+        flag_manual = false
+        document.getElementById("mes").style.visibility="hidden"
+        setCursor(g_W,g_C)
     }
 
-    function setOnClickHandlerToHeaders() {
-        var hs = ["H1", "H2", "H3", "H4", "H5", "H6", "H7"];
-        for (var i = 0; i < hs.length; i++) {
-            var es = document.getElementsByTagName(hs[i]);
+    function setOnClickHandlerToHeaders()
+    {
+        var hs = ["H1", "H2", "H3", "H4", "H5", "H6", "H7"]
+        for (var i = 0; i < hs.length; i++)
+        {
+            var es = document.getElementsByTagName(hs[i])
             if (es == null)
                 continue;
-            for (var ii = 0; ii < es.length; ii++) {
-                es[ii].addEventListener("click", onClickHandler, false);
+            for (var ii = 0; ii < es.length; ii++)
+            {
+                es[ii].addEventListener("click", onClickHandler, false)
             }
         }
     }
 
-    var g_foldStatus = {};
+    function onClickHandler()
+    {
+        var close
+        if (this.hasAttribute("data-clicked")
+            || this.hasAttribute("data-hidden"))
+        {
+            this.removeAttribute("data-clicked")
+            this.removeAttribute("data-hidden")
+            close = false
+        }
+        else
+        {
+            this.setAttribute("data-clicked", "true")
+            close = true
+        }
+        var close_orig = close
 
-    // merge two objects. usable for "associate arrays"
-    // destination is modified in place and returned
-    // same keys in destination are overwritten by source
-    function merge(d, s) {
-        for (var p in s) {
-            if (s.hasOwnProperty(p)) {
-                d[p] = s[p];
+        var start = false
+        // nodes' first item is div#out
+        for (var i = 1; i < nodes.length; i++)
+        {
+            var n = nodes[i]
+
+            if (start
+                && (n.nodeName[0] == "H"
+                    && n.nodeName[1] <= this.nodeName[1]))
+            {
+                break
             }
-        }
-        return d;
-    }
-
-    function getHeaderPath(t) {
-        var p = [];
-        var headerLevel = t.nodeName[1];
-        p.push(t.id);
-        while ((t = t.previousElementSibling)) {
-            if (t.nodeName[0] == "H"
-                    && t.nodeName[1] < headerLevel) {
-                headerLevel = t.nodeName[1];
-                p.push(t.id);
+            if (n.isSameNode(this))
+            {
+                start = true
+                continue
             }
-        }
-        return p;
-    }
 
-    function saveFoldStatus(t, i) {
-        var p = getHeaderPath(t);
+            if (start)
+            {
+                if (n.nodeName[0] != "H")
+                {
+                    close ? n.setAttribute("style", "display: none;")
+                          : n.removeAttribute("style")
+                }
+                else
+                {
+                    close = n.hasAttribute("data-clicked") ? true
+                                                           : close_orig
 
-        var obj = Object();
-        obj[p.join("#")] = i;
-
-        merge(g_foldStatus, obj);
-    }
-
-    // manualFold: undefined, true, false
-    // headerLevel: 0 - visible, > 0 - how many times folded
-    // contentLevel: 0 - visible, > 0 - how many times folded
-
-    // t["fold"] = [manualFold, headerLevel, contentLevel];
-
-    function getFoldInfo(t) {
-        var i = t["fold"];
-        if (i == undefined) {
-            return {mf: undefined, hl: 0, cl: 0};
-        } else {
-            return i;
-        }
-    }
-    function setFoldInfo(t, i) {
-        t["fold"] = i;
-        saveFoldStatus(t, i);
-    }
-
-    function toggleStackedFoldInfo(i) {
-        if (i.mf == undefined) {
-            if (i.cl > 0) {
-                i.mf = false;
-            } else {
-                i.mf = true;
+                    close ? n.setAttribute("data-hidden", "true")
+                          : n.removeAttribute("data-hidden")
+                }
             }
-        } else {
-            i.mf = !i.mf;
-        }
-        if (i.mf) {     // Folded
-            i.hl = 0;
-            i.cl = 1;
-        } else {        // Unfolded
-            i.hl = 0;
-            i.cl = 0;
-        }
-        return i;
-    }
-    function updateStackedFoldInfo(infoClickedHeader, infoHeader) {
-        infoHeader.hl = 0;
-        if (infoClickedHeader.mf) {
-            infoHeader.cl = 1;
-        } else {
-            if (infoHeader.mf) {
-                infoHeader.cl = 1;
-            } else {
-                infoHeader.cl = 0;
-            }
-        }
-        return infoHeader;
-    }
-    function toggleStructFoldInfo(i) {
-        if (i.mf == undefined) {
-            i.mf = true;
-        } else {
-            i.mf = !i.mf;
-        }
-        if (i.mf) {     // Folded
-            i.hl = 0;
-            i.cl = 1;
-        } else {        // Unfolded
-            i.hl = 0;
-            i.cl = 0;
-        }
-        return i;
-    }
-    function updateStructFoldInfo(infoClickedHeader, infoHeader) {
-        if (infoClickedHeader.mf) {
-            infoHeader.hl += 1;
-            infoHeader.cl += 1;
-        } else {
-            infoHeader.hl -= 1;
-            infoHeader.cl -= 1;
-        }
-        return infoHeader;
-    }
-    function applyFold(t, infoClickedHeader, updateFoldInfo) {
-        var headerLevel = t.nodeName[1];
-        var cl = infoClickedHeader.cl;
-
-        while ((t = t.nextElementSibling)
-                && (t.nodeName[0] != "H" || t.nodeName[1] > headerLevel)) {
-            if (t.nodeName[0] == "H") {
-                infoHeader = updateFoldInfo(infoClickedHeader, getFoldInfo(t));
-                setFoldInfo(t, infoHeader);
-                cl = infoHeader.cl;
-                t.style.display = infoHeader.hl > 0 ? "none" : "";
-            } else {
-                t.style.display = cl > 0 ? "none" : "";
-            }
-        }
-        return t;
-    }
-
-    function runHeaderPath(p, t, f) {
-        if (t == null) {
-            return;
-        }
-        if (p.length == 0) {
-            f(t);
-            return;
-        }
-        var id = p.pop();
-        while (t != null) {
-            if (t.id == id) {
-                runHeaderPath(p, t, f);
-                return;
-            }
-            t = t.nextElementSibling;
-        }
-    }
-    function finalElementFunc(i) {
-        return function X(t) {
-            setFoldInfo(t, i);
-            t.style.display = i.hl > 0 ? "none" : "";
-            while ((t = t.nextElementSibling)
-                    && t.nodeName[0] != "H") {
-                t.style.display = i.cl > 0 ? "none" : "";
-            }
-        }
-    }
-    function restoreFoldStatuses() {
-        var foldStatus = g_foldStatus;
-        g_foldStatus = {};
-
-        for (var p in foldStatus) {
-            if (foldStatus.hasOwnProperty(p)) {
-                var i = foldStatus[p];
-                var p = p.split("#");
-                var id = p.pop();
-                runHeaderPath(p, document.getElementById(id), finalElementFunc(i));
-            }
-        }
-    }
-
-    function onClickHandler() {
-        var t = this;
-
-        if (g_foldType == "struct") {
-            var infoClickedHeader = toggleStructFoldInfo(getFoldInfo(t));
-
-            setFoldInfo(t, infoClickedHeader);
-            applyFold(t, infoClickedHeader, updateStructFoldInfo);
-        } else if (g_foldType == "stacked") {
-            var infoClickedHeader = toggleStackedFoldInfo(getFoldInfo(t));
-
-            setFoldInfo(t, infoClickedHeader);
-            applyFold(t, infoClickedHeader, updateStackedFoldInfo);
         }
     }
 
@@ -417,4 +361,3 @@
   </div>
 </body>
 </html>
-

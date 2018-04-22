@@ -37,7 +37,9 @@ The web browser always shows changed area so you don't need to scroll manually.
 
 ### Supports links
 
-[Link to generated image from R](#whatever)
+    ```
+    [Link to generated image from R](#whatever)
+    ```
 
 ### *DOT* Graph
 
@@ -192,7 +194,6 @@ This *R* code is shown as the following picture in the preview window:
     x <- c(1,2,3,4, 5 )
     xx <- seq(1, 5, length.out=250)
            
-          
     plot(x, y)
 
     fit <- lm(y~x)

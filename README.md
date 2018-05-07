@@ -273,7 +273,7 @@ Place your VIM on one side of your screen and when `qutebrowser` appears, move i
 
 ### Structural diff support
 
- - python2 [htmltreediff](https://github.com/PolicyStat/htmltreediff.git)
+ - python2 [htmltreediff](https://github.com/tex/htmltreediff.git)
 
     `htmltreediff` requires setting of this environment variable to `PYTHONIOENCODING=UTF-8`
 

@@ -3,13 +3,7 @@ if has("python3")
 let g:vimpreviewpandoc_document = ""
 
 function! s:qutebrowser_set_output(data)
-python3 << EOF
-import vim
-import base64
-data = "'" + base64.b64encode(vim.eval("join(a:data, '\n')").encode("utf-8")).decode("utf-8") + "'"
-vim.command('let cmd = "setOutput(' + data + ')"')
-EOF
-call s:qutebrowser_exec(cmd)
+call s:qutebrowser_exec("setOutput('" . base64#encode(join(a:data)) . "')")
 endfunction
 
 function! s:qutebrowser_set_output_with_log(file, data)
@@ -58,16 +52,20 @@ endfunction
 function! vimpreviewpandoc#VimPreviewPandocGitDiff(file, from, to)
     let l:from_o = { 'data': [] }
     let l:to_o = { 'data': [] }
-    let id1 = s:start(['git', 'show', a:from . ':' . a:file], function('s:assign_output', [], l:from_o))
-    let id2 = s:start(['git', 'show', a:to . ':' . a:file], function('s:assign_output', [], l:to_o))
+    let id1 = s:start(['git', 'show', a:from . ':' . a:file],
+                \ function('s:assign_output', [], l:from_o))
+    let id2 = s:start(['git', 'show', a:to . ':' . a:file],
+                \ function('s:assign_output', [], l:to_o))
     call async#job#wait([id1, id2])
     call writefile(l:from_o.data, a:file.'.'.a:from)
     call writefile(l:to_o.data, a:file.'.'.a:to)
-    let id3 = s:start(s:pandoc_argv() + [a:file.'.'.a:from, '-o'.a:file.'.html.'.a:from], function('s:ignore_output', [""]))
-    let id4 = s:start(s:pandoc_argv() + [a:file.'.'.a:to, '-o'.a:file.'.html.'.a:to], function('s:ignore_output', [""]))
+    let id3 = s:start(s:pandoc_argv() + [a:file.'.'.a:from, '-o'.a:file.'.html.'.a:from],
+                \ function('s:ignore_output', [""]))
+    let id4 = s:start(s:pandoc_argv() + [a:file.'.'.a:to, '-o'.a:file.'.html.'.a:to],
+                \ function('s:ignore_output', [""]))
     call async#job#wait([id3, id4])
     call s:start(["python", "-m", "htmltreediff.cli", a:file.'.html.'.a:from, a:file.'.html.'.a:to], 
-                \ function('s:qutebrowser_set_output_with_log', [a:file.'.html.'.a:from.'.'.a:to]))
+                 \ function('s:qutebrowser_set_output_with_log', [a:file.'.html.'.a:from.'.'.a:to]))
 endfunction
 
 let s:path = expand('<sfile>:p:h').'/..'
@@ -79,8 +77,8 @@ function! s:qutebrowser_exec(data)
         let res = async#job#start(argv, {})
         execute 'sleep 1000m'
     endif
-    let argv = ['qutebrowser', ':jseval --quiet --world 0 '.a:data]
-    let res = async#job#start(argv, {})
+    call s:start(['qutebrowser', ':jseval --quiet --world 0 '.a:data],
+                \ function('s:ignore_output', ["Output pushed to qutebrowser!"]))
 endfunction
 
 
@@ -127,9 +125,8 @@ function! s:on_exit(callback, job_id, data, event_type)
     endif
     if s:jobs[a:job_id].error == 1
         echom join(s:jobs[a:job_id].data, '\n')
-    else
-        call a:callback(s:jobs[a:job_id].data)
     endif
+    call a:callback(s:jobs[a:job_id].data)
     call remove(s:jobs, a:job_id)
 endfunction
 
@@ -142,8 +139,6 @@ function! s:start(cmd, callback)
 endfunction
 
 python3 << EOF
-import base64
-
 def FindPosition():
     wordUnderCursor = vim.eval("expand('<cword>')")
     if len(wordUnderCursor) >= 3:
@@ -181,9 +176,7 @@ def FindPosition():
         # add one because the cursor's position column always trims the
         # word under cursor so it won't be found with line.count(...)
         count += 1
-        return "setCursor('" + base64.b64encode(
-                    \   wordUnderCursor.encode("utf-8")).decode("utf-8") +
-                    \  "', " + str(count) + ")"
+        return "setCursor('" + wordUnderCursor + "', " + str(count) + ")"
     else:
         return ""
 EOF

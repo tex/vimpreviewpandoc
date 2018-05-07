@@ -40,6 +40,9 @@
     ins { text-decoration: none; color: green }
     del { text-decoration: none; color: red }
 
+    ins img { border: 1px dashed green; }
+    del img { border: 1px dashed red; }
+
     ins a{ color: green; text-decoration:none; }
     del a{ color: red; text-decoration: none; }
 
@@ -167,11 +170,6 @@
         return (n)
     }
 
-    function unescape(data)
-    {
-        return decodeURIComponent(escape(window.atob(data)))
-    }
-
     var g_W;
     var g_C;
 
@@ -185,7 +183,6 @@
             g_C = C
             return
         }
-        W = unescape(W)
         var d = document.getElementById('out')
         for (var i = 0; i < d.childNodes.length; i++)
         {
@@ -199,7 +196,7 @@
         }
     }
 
-    function loop4(node)
+    function remove_ins_del_body_script(node)
     {
         var n = []
 
@@ -225,7 +222,7 @@
             }
             if (ns[i].childNodes.length > 0)
             {
-                m = loop4(ns[i])
+                m = remove_ins_del_body_script(ns[i])
                 for (var j = 0; j < m.length; j++)
                 {
                     n.push(m[j])
@@ -236,14 +233,19 @@
         return n
     }
 
-    var nodes = []
+    var g_nodes = []
+
+    function unescape(data)
+    {
+        return (window.atob(data))
+    }
 
     function setOutput(val)
     {
-        val = unescape(val)
         var out = document.getElementById('out')
+        val = unescape(val)
         out.innerHTML = val
-        nodes = loop4(out)
+        g_nodes = remove_ins_del_body_script(out)
         document.getElementById("mes").style.visibility="hidden"
         setOnClickHandlerToHeaders()
         window.onresize()
@@ -316,10 +318,10 @@
         var close_orig = close
 
         var start = false
-        // nodes' first item is div#out
-        for (var i = 1; i < nodes.length; i++)
+        // i = 1 since g_nodes' first item is div#out
+        for (var i = 1; i < g_nodes.length; i++)
         {
-            var n = nodes[i]
+            var n = g_nodes[i]
 
             if (start
                 && (n.nodeName[0] == "H"

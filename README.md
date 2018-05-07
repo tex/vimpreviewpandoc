@@ -251,9 +251,10 @@ This *Ditaa* code is shown as the following picture in the preview window:
 
 Install this plugin either manually or using any plugin manager (Vundle, NeoBundle, Plug...).
 
-This plugin is required for proper work:
+Those plugins are required:
 
 - [async.vim](https://github.com/prabirshrestha/async.vim.git)
+- [vim-base64](https://github.com/christianrondeau/vim-base64.git)
 
 I also recommend you to install the following plugins to extend pandoc support:
 
@@ -338,13 +339,13 @@ Add the following code to your *.vimrc* to add *diff_pandoc_preview* action to *
                     \               : expand('%:p')
         let relative_path = giti#to_relative_path(file)
         if len(a:candidates) == 1
-            let to   = a:candidates[0].action__data.hash
-            let from = a:candidates[0].action__data.parent_hash
+            let from = a:candidates[0].action__data.hash
+            let to   = a:candidates[0].action__data.parent_hash
         elseif len(a:candidates) == 2
             let to   = a:candidates[0].action__data.hash
             let from = a:candidates[1].action__data.hash
         else
-            call unite#print_error('too many commits selected')
+            call unite#print_error('select up to two commits')
             return
         endif
 
@@ -366,8 +367,8 @@ endif
     - custom filter to create a `graphviz` graphs from *dot* code blocks
     - custom filter to create a `blockdiag`, `seqdiag`, `actdiag`, `nwdiag`, `packetdiag`, `rackdiag` graphs from *blockdiag*, *seqdiag*, *actdiag*, *nwdiag*, *packetdiag*, *rackdiag* blocks
     - custom filter to create a `R` generated graphs from *R* code blocks
-    - custom filter to create a 'plantuml' generated graphics from *planuml* code blocks
-    - custom filter to create a 'ditaa' generated graphics from *ditaa* code blocks
+    - custom filter to create a `plantuml` generated graphics from *planuml* code blocks
+    - custom filter to create a `ditaa` generated graphics from *ditaa* code blocks
     - custom filter to fix block code view in `qutebrowser`
     - custom filter to replace relative paths to images to absolute paths
 

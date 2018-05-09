@@ -332,24 +332,21 @@ Add the following code to your *.vimrc* to add *diff_pandoc_preview* action to *
             return
         endif
 
-        let from  = ''
-        let to    = ''
         let file  = len(a:candidates[0].action__file) > 0
                     \               ? a:candidates[0].action__file
                     \               : expand('%:p')
         let relative_path = giti#to_relative_path(file)
         if len(a:candidates) == 1
             let from = a:candidates[0].action__data.hash
-            let to   = a:candidates[0].action__data.parent_hash
+            call vimpreviewpandoc#VimPreviewPandocGitDiff(relative_path, from)
         elseif len(a:candidates) == 2
             let to   = a:candidates[0].action__data.hash
             let from = a:candidates[1].action__data.hash
+            call vimpreviewpandoc#VimPreviewPandocGitDiff(relative_path, from, to)
         else
             call unite#print_error('select up to two commits')
             return
         endif
-
-        call vimpreviewpandoc#VimPreviewPandocGitDiff(relative_path, from, to)
     endfunction
 
     call unite#custom#action('giti/log', 'diff_pandoc_preview', s:pandoc_diff_action)

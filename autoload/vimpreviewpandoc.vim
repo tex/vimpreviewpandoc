@@ -51,30 +51,30 @@ endfunction
 
 function! vimpreviewpandoc#VimPreviewPandocGitDiff(file, from, to)
     let l:to_o = { 'data': [] }
-    let id2 = s:start(['git', 'show', a:to . ':' . a:file],
+    let id1 = s:start(['git', 'show', a:to . ':' . a:file],
                 \ function('s:assign_output', [], l:to_o))
-    call async#job#wait([id2])
+    call async#job#wait([id1])
     call writefile(l:to_o.data, a:file.'.'.a:to)
-    call s:tmp1(a:file, a:from, a:to)
+    call s:pandoc_git_file_diff(a:file, a:from, a:to)
 endfunction
 
 function! vimpreviewpandoc#VimPreviewPandocGitDiff(file, from)
     call writefile(getline(1, '$'), a:file.'.'.'current')
-    call s:tmp1(a:file, a:from, 'current')
+    call s:pandoc_git_file_diff(a:file, a:from, 'current')
 endfunction
 
-function! s:tmp1(file, from, to)
+function! s:pandoc_git_file_diff(file, from, to)
     let l:from_o = { 'data': [] }
     let id1 = s:start(['git', 'show', a:from . ':' . a:file],
                 \ function('s:assign_output', [], l:from_o))
     call async#job#wait([id1])
     call writefile(l:from_o.data, a:file.'.'.a:from)
 
-    let id3 = s:start(s:pandoc_argv() + [a:file.'.'.a:from, '-o'.a:file.'.html.'.a:from],
+    let id2 = s:start(s:pandoc_argv() + [a:file.'.'.a:from, '-o'.a:file.'.html.'.a:from],
                 \ function('s:ignore_output', [""]))
-    let id4 = s:start(s:pandoc_argv() + [a:file.'.'.a:to, '-o'.a:file.'.html.'.a:to],
+    let id3 = s:start(s:pandoc_argv() + [a:file.'.'.a:to, '-o'.a:file.'.html.'.a:to],
                 \ function('s:ignore_output', [""]))
-    call async#job#wait([id3, id4])
+    call async#job#wait([id2, id3])
     call s:start(["python", "-m", "htmltreediff.cli", a:file.'.html.'.a:from, a:file.'.html.'.a:to], 
                  \ function('s:qutebrowser_set_output_with_log', [a:file.'.html.'.a:from.'.'.a:to]))
 endfunction

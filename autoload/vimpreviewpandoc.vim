@@ -193,5 +193,10 @@ def FindPosition():
 EOF
 
 else
+
+if !exists(g:vimpreviewpandoc_error)
 echoerr "VimPreviewPandoc: Python3 support required!"
+let g:vimpreviewpandoc_error = 1
+endif
+
 endif

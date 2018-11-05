@@ -1,11 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 """
 Pandoc filter to process code blocks with class "blockdiag", "seqdiag",
 "actdiag", "nwdiag", "packetdiag", "rackdiag" into generated images.
-This has to be executed by python2 because diag and others are implemented
-in python2. Executing in python3 leads to module named site not found
-error.
 """
 
 import subprocess

@@ -251,12 +251,14 @@ This *Ditaa* code is shown as the following picture in the preview window:
 
 Install this plugin either manually or using any plugin manager (Vundle, NeoBundle, Plug...).
 
+Make sure that python scripts in *plugin* sub folder (pre.py, blockdiag.py, ...) needs to have executable bit set. This is required by `pandoc` to read its shebang and execute it with python version as specified with the shebang.
+
 Those plugins are required:
 
 - [async.vim](https://github.com/prabirshrestha/async.vim.git)
 - [vim-base64](https://github.com/christianrondeau/vim-base64.git)
 
-I also recommend you to install the following plugins to extend pandoc support:
+I also recommend you to install the following plugins to extend `pandoc` support:
 
 - [vim-pandoc](https://github.com/vim-pandoc/vim-pandoc)
 - [vim-pandoc-syntax](https://github.com/vim-pandoc/vim-pandoc-syntax.git)
@@ -268,8 +270,7 @@ Place your VIM on one side of your screen and when `qutebrowser` appears, move i
 
  - VIM with python3 support
  - pandoc *1.12.3.3* and newer
- - pyhton2 [pandocfilters](https://github.com/jgm/pandocfilters)
- - pyhton3 [pandocfilters](https://github.com/jgm/pandocfilters)
+ - python3 [pandocfilters](https://github.com/jgm/pandocfilters)
 
 ### Structural diff support
 

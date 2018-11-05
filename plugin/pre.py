@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 """
 Pandoc filter to process code blocks. This is just a workaround to ?bug? in

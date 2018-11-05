@@ -3,7 +3,7 @@ if has("python3")
 let g:vimpreviewpandoc_document = ""
 
 function! s:qutebrowser_set_output(data)
-call s:qutebrowser_exec("setOutput('" . base64#encode(join(a:data)) . "')")
+    call s:qutebrowser_exec("setOutput('" . base64#encode(join(a:data)) . "')")
 endfunction
 
 function! s:qutebrowser_set_output_with_log(file, data)
@@ -86,7 +86,7 @@ function! s:qutebrowser_exec(data)
         unlet b:qutebrowser_open
         let argv = ['qutebrowser', ':open '.s:path.'/static/index.html']
         let res = async#job#start(argv, {})
-        execute 'sleep 1000m'
+        execute 'sleep 5000m'
     endif
     call s:start(['qutebrowser', ':jseval --quiet --world 0 '.a:data],
                 \ function('s:ignore_output', ["Output pushed to qutebrowser!"]))

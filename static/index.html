@@ -240,10 +240,20 @@
         return (window.atob(data))
     }
 
-    function setOutput(val)
+    var g_tmp = {}
+
+    function setOutput(i, val)
     {
+        g_tmp[i] = val
+    }
+
+    function commitOutput()
+    {
+        tmp = ''
+        for (i in g_tmp) { tmp += g_tmp[i] }
+        g_tmp = {}
+        val = unescape(tmp)
         var out = document.getElementById('out')
-        val = unescape(val)
         out.innerHTML = val
         g_nodes = remove_ins_del_body_script(out)
         document.getElementById("mes").style.visibility="hidden"

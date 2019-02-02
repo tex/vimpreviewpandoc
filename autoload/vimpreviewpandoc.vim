@@ -3,7 +3,17 @@ if has("python3")
 let g:vimpreviewpandoc_document = ""
 
 function! s:qutebrowser_set_output(data)
-    call s:qutebrowser_exec("setOutput('" . base64#encode(join(a:data)) . "')")
+    let data = base64#encode(join(a:data))
+    let b = 1024
+    let s = 0
+    let l = strlen(data)
+    while (l > 0)
+        call s:qutebrowser_exec("setOutput(". s .",'" . strpart(data, s, b) . "')", " ".(s/b))
+        let s = s + b
+        let l = l - b
+    endwhile
+    execute 'sleep 1000m'
+    call s:qutebrowser_exec("commitOutput()", '')
 endfunction
 
 function! s:qutebrowser_set_output_with_log(file, data)
@@ -30,7 +40,7 @@ import vim
 vim.command('let cmd = "' + FindPosition() + '"')
 EOF
 if len(cmd) > 0
-    call s:qutebrowser_exec(cmd)
+    call s:qutebrowser_exec(cmd, '')
 endif
 endfunction
 
@@ -81,7 +91,7 @@ endfunction
 
 let s:path = expand('<sfile>:p:h').'/..'
 
-function! s:qutebrowser_exec(data)
+function! s:qutebrowser_exec(data, msg)
     if exists('b:qutebrowser_open')
         unlet b:qutebrowser_open
         let argv = ['qutebrowser', ':open '.s:path.'/static/index.html']
@@ -89,7 +99,7 @@ function! s:qutebrowser_exec(data)
         execute 'sleep 5000m'
     endif
     call s:start(['qutebrowser', ':jseval --quiet --world 0 '.a:data],
-                \ function('s:ignore_output', ["Output pushed to qutebrowser!"]))
+                \ function('s:ignore_output', ["Output pushed to qutebrowser".a:msg]))
 endfunction
 
 
@@ -119,8 +129,10 @@ function! s:on_stderr(job_id, data, event_type)
     if !has_key(s:jobs, a:job_id)
         call s:new_job(a:job_id)
     endif
-    let s:jobs[a:job_id].data += a:data
-    let s:jobs[a:job_id].error = 1
+    if strlen(join(a:data, '')) > 0
+        let s:jobs[a:job_id].data += a:data
+        let s:jobs[a:job_id].error = 1
+    endif
 endfunction
 
 function! s:on_stdout(job_id, data, event_type)

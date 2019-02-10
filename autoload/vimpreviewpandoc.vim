@@ -4,7 +4,7 @@ let g:vimpreviewpandoc_document = ""
 
 function! s:qutebrowser_set_output(data)
     let data = base64#encode(join(a:data))
-    let b = 1024
+    let b = 100*1024
     let s = 0
     let l = strlen(data)
     while (l > 0)

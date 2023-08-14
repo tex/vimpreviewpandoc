@@ -4,42 +4,30 @@
 
 VimPreviewPandoc is VIM plugin that helps you with editing MarkDown-like documents.
 
-Edit your MarkDown documents in VIM and see a nice HTML-based output in `qutebrowser`.
-The web browser always shows changed area so you don't need to scroll manually.
+Edit your MarkDown documents in VIM and see a nice `pandoc` generated output in `epiphany`.
+Output in `epiphany` is updated automatically always when the document is saved.
 
 ## Features
 
- - Preview your MarkDown documents with `qutebrowser`
+ - Preview your MarkDown documents with `epiphany`
 
-    - Scroll browser's view to show changed area automatically
+    - :call vimpreviewpandoc#PreviewForce() to open `epiphany` if it was closed manually
+
+    - Automatically opens `epiphany` when a markdown document is opened
+    - Automatically refreshes `pandoc` generated output when document is saved
+
     - Generate `dot` graphs with `graphviz`
     - Generate `blockdiag`, `seqdiag`, `actdiag`, `nwdiag`, `packetdiag`, `rackdiag` graphs
     - Generate `R` graphs
     - Generate PlantUML graphs
-    - Generate ascii art based images with `ditaa`
-
- - Show structural diff of specified file between specified git revisions
-
-    - `:call vimpreviewpandoc#VimPreviewPandocGitDiff(expand("%"), "HEAD~5", "HEAD")`
-    - `:Unite giti/log`, press `a` (action), select `diff_pandoc_preview`
-
-        Please see [Unite.vim integration] for required configuration.
+    - Generate ASCII art based images with `ditaa`
+    - Generate images with `pikchr`
 
  - Generate output document in specified output format
 
-    - `:call vimpreviewpandoc#VimPreviewPandocConvertTo("docx,html")`
-
-## TODO
-
- - Decouple `pandoc` plugins to a separate project
+    - `:call vimpreviewpandoc#ConvertTo("docx,html")`
 
 ## Examples
-
-### Supports links
-
-    ```
-    [Link to generated image from R](#whatever)
-    ```
 
 ### *DOT* Graph
 
@@ -247,16 +235,27 @@ This *Ditaa* code is shown as the following picture in the preview window:
 
 ![](.dot/ae322a2246aab824d3548bbdce54194d469ac5a4.png)
 
+### Pikchr
+
+    ``` pikchr
+    arrow right 200% "Markdown" "Source"
+    box rad 10px "Markdown" "Formatter" "(markdown.c)" fit
+    arrow right 200% "HTML+SVG" "Output"
+    arrow <-> down 70% from last box.s
+    box same "Pikchr" "Formatter" "(pikchr.c)" fit
+    ```
+
+![](.dot/3e35bd41050bc18274dc4012895f3eeed27c20ee.svg)
+
 ## Installation
 
 Install this plugin either manually or using any plugin manager (Vundle, NeoBundle, Plug...).
 
-Make sure that python scripts in *plugin* sub folder (pre.py, blockdiag.py, ...) needs to have executable bit set. This is required by `pandoc` to read its shebang and execute it with python version as specified with the shebang.
+Make sure that python scripts in *python* folder (pre.py, blockdiag.py, ...) needs to have executable bit set. This is required by `pandoc` to read its shebang and execute it with python version as specified with the shebang.
 
 Those plugins are required:
 
 - [async.vim](https://github.com/prabirshrestha/async.vim.git)
-- [vim-base64](https://github.com/christianrondeau/vim-base64.git)
 
 I also recommend you to install the following plugins to extend `pandoc` support:
 
@@ -264,118 +263,20 @@ I also recommend you to install the following plugins to extend `pandoc` support
 - [vim-pandoc-syntax](https://github.com/vim-pandoc/vim-pandoc-syntax.git)
 - [vim-pandoc-after](https://github.com/vim-pandoc/vim-pandoc-after.git)
 
-Place your VIM on one side of your screen and when `qutebrowser` appears, move it to the other side to get productive environment. `qutebrowser` shows automatically correct preview.
+Place your VIM on one side of your screen and when `epiphany` appears, move it to the other side to get productive environment.
 
 ## Dependencies
 
- - VIM with python3 support
  - pandoc *1.12.3.3* and newer
  - python3 [pandocfilters](https://github.com/jgm/pandocfilters)
-
-### Structural diff support
-
- - python2 [htmltreediff](https://github.com/tex/htmltreediff.git)
-
-    `htmltreediff` requires setting of this environment variable to `PYTHONIOENCODING=UTF-8`
-
- - optionally [unite.vim](https://github.com/Shougo/unite.vim.git) with [vim-unite-giti](https://github.com/kmnk/vim-unite-giti.git)
-
-### Dot graph support
+ - [Epiphany](https://wiki.gnome.org/Apps/Web)
 
  - [graphviz](http://www.graphviz.org)
-
-### Diag-family graphs support
-
  - [blockdiag](http://blockdiag.com/en/blockdiag/index.html)
  - [seqdiag](http://blockdiag.com/en/seqdiag/index.html)
  - [actdiag](http://blockdiag.com/en/actdiag/index.html)
  - [nwdiag](http://blockdiag.com/en/nwdiag/index.html)
-
-### R graph support
-
  - [R](http://r-project.org)
-
-### PlantUML
-
  - [PlantUML](https://github.com/plantuml/plantuml)
-
-### Ditaa
-
  - [Ditaa](https://github.com/stathissideris/ditaa.git)
-
-### Qutebrowser
-
- - [Qutebrowser](https://qutebrowser.org)
-
-## Unite.vim integration
-
-Add the following code to your *.vimrc* to add *diff_pandoc_preview* action to *vim-unite-giti*'s *giti-log*.
-
-```vimrc
-    if neobundle#tap("unite.vim")
-                \ && neobundle#tap("vim-unite-giti")
-                \ && neobundle#tap("vimpreviewpandoc")
-
-        function! s:is_graph_only_line(candidate)
-            return has_key(a:candidate.action__data, 'hash') ? 0 : 1
-        endfunction
-
-    let s:pandoc_diff_action = {
-        \ 'description' : 'pandoc diff with vimpreviewpandoc',
-        \ 'is_selectable' : 1,
-        \ 'is_quit' : 1,
-        \ 'is_invalidate_cache' : 0,
-        \ }
-    function! s:pandoc_diff_action.func(candidates)
-        if s:is_graph_only_line(a:candidates[0])
-                    \ || len(a:candidates) > 1 && s:is_graph_only_line(a:candidates[1])
-            call giti#print('graph only line')
-            return
-        endif
-
-        let file  = len(a:candidates[0].action__file) > 0
-                    \               ? a:candidates[0].action__file
-                    \               : expand('%:p')
-        let relative_path = giti#to_relative_path(file)
-        if len(a:candidates) == 1
-            let from = a:candidates[0].action__data.hash
-            call vimpreviewpandoc#VimPreviewPandocGitDiff(relative_path, from)
-        elseif len(a:candidates) == 2
-            let to   = a:candidates[0].action__data.hash
-            let from = a:candidates[1].action__data.hash
-            call vimpreviewpandoc#VimPreviewPandocGitDiff(relative_path, from, to)
-        else
-            call unite#print_error('select up to two commits')
-            return
-        endif
-    endfunction
-
-    call unite#custom#action('giti/log', 'diff_pandoc_preview', s:pandoc_diff_action)
-    unlet s:pandoc_diff_action
-
-endif
-```
-
-## Theory of operation
-
- `BufwinEnter`, `CursorHold,CusrsorHildI` events execute the following:
-
- - `pandoc` to convert MarkDown document to HTML
-
-    - custom filter to create a `graphviz` graphs from *dot* code blocks
-    - custom filter to create a `blockdiag`, `seqdiag`, `actdiag`, `nwdiag`, `packetdiag`, `rackdiag` graphs from *blockdiag*, *seqdiag*, *actdiag*, *nwdiag*, *packetdiag*, *rackdiag* blocks
-    - custom filter to create a `R` generated graphs from *R* code blocks
-    - custom filter to create a `plantuml` generated graphics from *planuml* code blocks
-    - custom filter to create a `ditaa` generated graphics from *ditaa* code blocks
-    - custom filter to fix block code view in `qutebrowser`
-    - custom filter to replace relative paths to images to absolute paths
-
-    - qutebrowser
-
-        - `qutebrowser` uses a socket to talk to already running instance
-        - this allows to execute JavaScript on loaded page
-
- - index.html is empty page with `setCursor(word, count)` and `setOutput(html)` functions
-
-     - `setCursor(word, count)` finds the encoded position and scrolls window to it
-     - `setOutput(html)` replaces the content of the `div` with a new one
+ - [pikchr](https://pikchr.org/home/doc/trunk/homepage.md)

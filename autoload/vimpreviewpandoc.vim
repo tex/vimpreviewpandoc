@@ -1,47 +1,38 @@
-if has("python3")
-
-let g:vimpreviewpandoc_document = ""
-
-function! s:qutebrowser_set_output(data)
-    let data = base64#encode(join(a:data))
-    let b = 100*1024
-    let s = 0
-    let l = strlen(data)
-    while (l > 0)
-        call s:qutebrowser_exec("setOutput(". s .",'" . strpart(data, s, b) . "')", " ".(s/b))
-        let s = s + b
-        let l = l - b
-    endwhile
-    execute 'sleep 1000m'
-    call s:qutebrowser_exec("commitOutput()", '')
-endfunction
-
-function! s:qutebrowser_set_output_with_log(file, data)
-    call writefile(a:data, a:file)
-    call s:qutebrowser_set_output(a:data)
-endfunction
-
-function! vimpreviewpandoc#VimPreviewPandoc()
+function! vimpreviewpandoc#Preview()
     if !exists('b:vimpreviewpandoc_changedtick')
         \ || b:vimpreviewpandoc_changedtick != b:changedtick
-        if g:vimpreviewpandoc_document != expand('%:p')
-            let b:qutebrowser_open = 1
-            let g:vimpreviewpandoc_document = expand('%:p')
-        endif
         let cmd = s:pandoc_argv() + [expand('%:p')]
-        call s:start(cmd, function('s:qutebrowser_set_output_with_log', [expand('%:p').".html"]))
+        call s:start(cmd, function('s:after_pandoc', [expand('%:p').".html"]))
     endif
     let b:vimpreviewpandoc_changedtick = b:changedtick
 endfunction
 
-function! vimpreviewpandoc#VimPreviewScrollTo()
-python3 << EOF
-import vim
-vim.command('let cmd = "' + FindPosition() + '"')
-EOF
-if len(cmd) > 0
-    call s:qutebrowser_exec(cmd, '')
-endif
+function! vimpreviewpandoc#PreviewForce()
+    if exists('b:vimpreviewpandoc_browser')
+        unlet b:vimpreviewpandoc_browser
+    endif
+    if exists('b:vimpreviewpandoc_changedtick')
+        unlet b:vimpreviewpandoc_changedtick
+    endif
+    call vimpreviewpandoc#Preview()
+endfunction
+
+function! vimpreviewpandoc#ConvertTo(ext)
+    let cmd = s:pandoc_argv() + [expand('%:p'), '-o ' + expand('%:p') + a:ext]
+    call s:start(cmd, function('s:ignore_output', ["Pandoc conversion finished!"]))
+endfunction
+
+
+function! s:after_pandoc(file, data)
+    " epiphany does automatically refresh local html file
+    call writefile(a:data, a:file)
+    " open epiphany if not opened for this buffer
+    " will open a new tab if epiphany is already opened
+    if !exists('b:vimpreviewpandoc_browser')
+        let b:vimpreviewpandoc_browser = 1
+        let argv = ['epiphany', a:file]
+        let res = async#job#start(argv, {})
+    endif
 endfunction
 
 function! s:ignore_output(message, data)
@@ -50,69 +41,19 @@ function! s:ignore_output(message, data)
     endif
 endfunction
 
-function! vimpreviewpandoc#VimPreviewPandocConvertTo(ext)
-    let cmd = s:pandoc_argv() + [expand('%:p'), '-o ' + expand('%:p') + a:ext]
-    call s:start(cmd, function('s:ignore_output', ["Pandoc conversion finished!"]))
-endfunction
-
-function! s:assign_output(data) dict
-    let self.data = a:data
-endfunction
-
-function! vimpreviewpandoc#VimPreviewPandocGitDiff(file, from, to)
-    let l:to_o = { 'data': [] }
-    let id1 = s:start(['git', 'show', a:to . ':' . a:file],
-                \ function('s:assign_output', [], l:to_o))
-    call async#job#wait([id1])
-    call writefile(l:to_o.data, a:file.'.'.a:to)
-    call s:pandoc_git_file_diff(a:file, a:from, a:to)
-endfunction
-
-function! vimpreviewpandoc#VimPreviewPandocGitDiff(file, from)
-    call writefile(getline(1, '$'), a:file.'.'.'current')
-    call s:pandoc_git_file_diff(a:file, a:from, 'current')
-endfunction
-
-function! s:pandoc_git_file_diff(file, from, to)
-    let l:from_o = { 'data': [] }
-    let id1 = s:start(['git', 'show', a:from . ':' . a:file],
-                \ function('s:assign_output', [], l:from_o))
-    call async#job#wait([id1])
-    call writefile(l:from_o.data, a:file.'.'.a:from)
-
-    let id2 = s:start(s:pandoc_argv() + [a:file.'.'.a:from, '-o'.a:file.'.html.'.a:from],
-                \ function('s:ignore_output', [""]))
-    let id3 = s:start(s:pandoc_argv() + [a:file.'.'.a:to, '-o'.a:file.'.html.'.a:to],
-                \ function('s:ignore_output', [""]))
-    call async#job#wait([id2, id3])
-    call s:start(["python", "-m", "htmltreediff.cli", a:file.'.html.'.a:from, a:file.'.html.'.a:to], 
-                 \ function('s:qutebrowser_set_output_with_log', [a:file.'.html.'.a:from.'.'.a:to]))
-endfunction
-
-let s:path = expand('<sfile>:p:h').'/..'
-
-function! s:qutebrowser_exec(data, msg)
-    if exists('b:qutebrowser_open')
-        unlet b:qutebrowser_open
-        let argv = ['qutebrowser', ':open '.s:path.'/static/index.html']
-        let res = async#job#start(argv, {})
-        execute 'sleep 5000m'
-    endif
-    call s:start(['qutebrowser', ':jseval --quiet --world 0 '.a:data],
-                \ function('s:ignore_output', ["Output pushed to qutebrowser".a:msg]))
-endfunction
-
+let s:path = expand('<sfile>:p:h') . '/..'
 
 function! s:pandoc_argv()
     return ['pandoc',
                 \ '--ascii',
-                \ '--filter='.s:path.'/plugin/graphviz.py',
-                \ '--filter='.s:path.'/plugin/blockdiag.py',
-                \ '--filter='.s:path.'/plugin/R.py',
-                \ '--filter='.s:path.'/plugin/plantuml.py',
-                \ '--filter='.s:path.'/plugin/ditaa.py',
-                \ '--filter='.s:path.'/plugin/pre.py',
-                \ '--filter='.s:path.'/plugin/realpath.py',
+                \ '--lua-filter='.s:path.'/pandoc/pikchr.lua',
+                \ '--filter='.s:path.'/pandoc/graphviz.py',
+                \ '--filter='.s:path.'/pandoc/blockdiag.py',
+                \ '--filter='.s:path.'/pandoc/R.py',
+                \ '--filter='.s:path.'/pandoc/plantuml.py',
+                \ '--filter='.s:path.'/pandoc/ditaa.py',
+                \ '--filter='.s:path.'/pandoc/pre.py',
+                \ '--filter='.s:path.'/pandoc/realpath.py',
                 \ '--number-section']
 endfunction
 
@@ -160,55 +101,3 @@ function! s:start(cmd, callback)
                 \ 'on_stderr': function('s:on_stderr'),
                 \ })
 endfunction
-
-python3 << EOF
-def FindPosition():
-    wordUnderCursor = vim.eval("expand('<cword>')")
-    if len(wordUnderCursor) >= 3:
-        cb = vim.current.buffer
-        (row, col) = vim.current.window.cursor
-        count = 0
-        inBlock = False
-        for i in range(0, row):
-            line = cb[i]
-            if line[0:3] == '```':
-                if inBlock:
-                    inBlock = not inBlock
-                elif line[0:6] == '```dot' \
-                    or line[0:4] == '```R' \
-                    or line[0:8] == '```ditaa' \
-                    or line[0:11] == '```plantuml' \
-                    or line[0:12] == '```blockdiag' \
-                    or line[0:10] == '```seqdiag' \
-                    or line[0:10] == '```actdiag' \
-                    or line[0:9] == '```nwdiag':
-                    inBlock = True
-            if i == row - 1:                # last line?
-                if inBlock:                 #  in a block?
-                    return ""               #   not found
-                line = line[0:col]          #  limit line to cursor's position column
-            else:
-                if inBlock:                 #  in a block?
-                    continue                #   skip the line
-            if i + 1 < row \
-                and cb[i+1].count("{.bookmark") \
-                and cb[i+1][0] == "#":              # next line follows?
-                                                    # is that line a bookmark?
-                continue                            #  skip current line
-            count += line.count(wordUnderCursor)
-        # add one because the cursor's position column always trims the
-        # word under cursor so it won't be found with line.count(...)
-        count += 1
-        return "setCursor('" + wordUnderCursor + "', " + str(count) + ")"
-    else:
-        return ""
-EOF
-
-else
-
-if !exists(g:vimpreviewpandoc_error)
-echoerr "VimPreviewPandoc: Python3 support required!"
-let g:vimpreviewpandoc_error = 1
-endif
-
-endif

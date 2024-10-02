@@ -1,7 +1,7 @@
 function! vimpreviewpandoc#Preview()
     if !exists('b:vimpreviewpandoc_changedtick')
         \ || b:vimpreviewpandoc_changedtick != b:changedtick
-        let cmd = s:pandoc_argv() + [expand('%:p')]
+        let cmd = s:pandoc_argv() + ['--metadata=title:"'.expand('%:p').'"', expand('%:p')]
         call s:start(cmd, function('s:after_pandoc', [expand('%:p').".html"]))
     endif
     let b:vimpreviewpandoc_changedtick = b:changedtick
@@ -18,7 +18,7 @@ function! vimpreviewpandoc#PreviewForce()
 endfunction
 
 function! vimpreviewpandoc#ConvertTo(ext)
-    let cmd = s:pandoc_argv() + [expand('%:p'), '-o ' + expand('%:p') + a:ext]
+    let cmd = s:pandoc_argv() + ['--metadata=title:"'.expand('%:p').'"', expand('%:p'), '-o ' + expand('%:p') + a:ext]
     call s:start(cmd, function('s:ignore_output', ["Pandoc conversion finished!"]))
 endfunction
 
@@ -45,6 +45,7 @@ let s:path = expand('<sfile>:p:h') . '/..'
 
 function! s:pandoc_argv()
     return ['pandoc',
+                \ '-s',
                 \ '--ascii',
                 \ '--lua-filter='.s:path.'/pandoc/pikchr.lua',
                 \ '--filter='.s:path.'/pandoc/graphviz.py',
@@ -54,6 +55,7 @@ function! s:pandoc_argv()
                 \ '--filter='.s:path.'/pandoc/ditaa.py',
                 \ '--filter='.s:path.'/pandoc/pre.py',
                 \ '--filter='.s:path.'/pandoc/realpath.py',
+                \ '--css= '.s:path.'/pandoc/style.css',
                 \ '--number-section']
 endfunction
 

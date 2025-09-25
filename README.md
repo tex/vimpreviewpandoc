@@ -22,6 +22,7 @@ Output in `epiphany` is updated automatically always when the document is saved.
     - Generate PlantUML graphs
     - Generate ASCII art based images with `ditaa`
     - Generate images with `pikchr`
+    - Generate images with `memraid`
 
  - Generate output document in specified output format
 
@@ -33,13 +34,13 @@ Output in `epiphany` is updated automatically always when the document is saved.
 
 This *DOT* code is shown as the following picture in the preview window:
 
-    ```dot
-    graph {
-    A -- B
-    C -- B
-    C -- D
-    }
-    ```
+```dot
+graph {
+A -- B
+C -- B
+C -- D
+}
+```
 
 ![](.dot/aec7aeb0383414f6b9953047930d7e6a98eba221.png)
 
@@ -47,11 +48,11 @@ This *DOT* code is shown as the following picture in the preview window:
 
 This *DOT* code is shown as the following picture in the preview window:
 
-    ```blockdiag
-    blockdiag {
-    A -> B -> C
-    }
-    ```
+```blockdiag
+blockdiag {
+A -> B -> C
+}
+```
 
 ![](.dot/1a92794a2297a42b1a8c4333a02a2a1fd0ad0531.png)
 
@@ -59,16 +60,16 @@ This *DOT* code is shown as the following picture in the preview window:
 
 This *Seqdiag* code is shown as the following picture in the preview window:
 
-    ```seqdiag
-    seqdiag {
-      browser  -> webserver [label = "GET /index.html"];
-      browser <-- webserver;
-      browser  -> webserver [label = "POST /blog/comment"];
-                  webserver  -> database [label = "INSERT comment"];
-                  webserver <-- database;
-      browser <-- webserver;
-    }
-    ```
+```seqdiag
+seqdiag {
+  browser  -> webserver [label = "GET /index.html"];
+  browser <-- webserver;
+  browser  -> webserver [label = "POST /blog/comment"];
+              webserver  -> database [label = "INSERT comment"];
+              webserver <-- database;
+  browser <-- webserver;
+}
+```
 
 ![](.dot/ed14e596b4aae2d220c398a53d8348a0e747c47e.png)
 
@@ -76,20 +77,20 @@ This *Seqdiag* code is shown as the following picture in the preview window:
 
 This *Actdiag* code is shown as the following picture in the preview window:
 
-    ```actdiag
-    actdiag {
-      write -> convert -> image
+```actdiag
+actdiag {
+  write -> convert -> image
 
-      lane user {
-         label = "User"
-         write [label = "Writing reST"];
-         image [label = "Get diagram IMAGE"];
-      }
-      lane actdiag {
-         convert [label = "Convert reST to Image"];
-      }
-    }
-    ```
+  lane user {
+     label = "User"
+     write [label = "Writing reST"];
+     image [label = "Get diagram IMAGE"];
+  }
+  lane actdiag {
+     convert [label = "Convert reST to Image"];
+  }
+}
+```
 
 ![](.dot/b1e11e258d038f18d8ac1c6a6b18507438faf842.png)
 
@@ -97,24 +98,24 @@ This *Actdiag* code is shown as the following picture in the preview window:
 
 This *Nwdiag* code is shown as the following picture in the preview window:
 
-    ```nwdiag
-    nwdiag {
-      network dmz {
-          address = "210.x.x.x/24"
+```nwdiag
+nwdiag {
+  network dmz {
+      address = "210.x.x.x/24"
 
-          web01 [address = "210.x.x.1"];
-          web02 [address = "210.x.x.2"];
-      }
-      network internal {
-          address = "172.x.x.x/24";
+      web01 [address = "210.x.x.1"];
+      web02 [address = "210.x.x.2"];
+  }
+  network internal {
+      address = "172.x.x.x/24";
 
-          web01 [address = "172.x.x.1"];
-          web02 [address = "172.x.x.2"];
-          db01;
-          db02;
-      }
-    }
-    ```
+      web01 [address = "172.x.x.1"];
+      web02 [address = "172.x.x.2"];
+      db01;
+      db02;
+  }
+}
+```
 
 ![](.dot/f554ea7bf97fb660fa23931c6b1129f1af825cf9.png)
 
@@ -122,30 +123,30 @@ This *Nwdiag* code is shown as the following picture in the preview window:
 
 This *Packetdiag* code is shown as the following picture in the preview window:
 
-    ```packetdiag
-    {
-      colwidth = 32
-      node_height = 72
+```packetdiag
+{
+  colwidth = 32
+  node_height = 72
 
-      0-15: Source Port
-      16-31: Destination Port
-      32-63: Sequence Number
-      64-95: Acknowledgment Number
-      96-99: Data Offset
-      100-105: Reserved
-      106: URG [rotate = 270]
-      107: ACK [rotate = 270]
-      108: PSH [rotate = 270]
-      109: RST [rotate = 270]
-      110: SYN [rotate = 270]
-      111: FIN [rotate = 270]
-      112-127: Window
-      128-143: Checksum
-      144-159: Urgent Pointer
-      160-191: (Options and Padding)
-      192-223: data [colheight = 3]
-    }
-    ```
+  0-15: Source Port
+  16-31: Destination Port
+  32-63: Sequence Number
+  64-95: Acknowledgment Number
+  96-99: Data Offset
+  100-105: Reserved
+  106: URG [rotate = 270]
+  107: ACK [rotate = 270]
+  108: PSH [rotate = 270]
+  109: RST [rotate = 270]
+  110: SYN [rotate = 270]
+  111: FIN [rotate = 270]
+  112-127: Window
+  128-143: Checksum
+  144-159: Urgent Pointer
+  160-191: (Options and Padding)
+  192-223: data [colheight = 3]
+}
+```
 
 ![](.dot/bf2856a4c0ead5305f15bd74063717f1df5631d8.png)
 
@@ -153,22 +154,21 @@ This *Packetdiag* code is shown as the following picture in the preview window:
 
 This *Rackdiag* code is shown as the following picture in the preview window:
 
-    ```rackdiag
+```rackdiag
+rackdiag {
+  // define height of rack
+  16U;
 
-    rackdiag {
-      // define height of rack
-      16U;
-
-      // define rack items
-      1: UPS [2U];
-      3: DB Server
-      4: Web Server
-      5: Web Server
-      6: Web Server
-      7: Load Balancer
-      8: L3 Switch
-    }
-    ```
+  // define rack items
+  1: UPS [2U];
+  3: DB Server
+  4: Web Server
+  5: Web Server
+  6: Web Server
+  7: Load Balancer
+  8: L3 Switch
+}
+```
 
 ![](.dot/d26aa0f06de6baa647e45b2295901dce690d0711.png)
 
@@ -176,28 +176,26 @@ This *Rackdiag* code is shown as the following picture in the preview window:
 
 This *R* code is shown as the following picture in the preview window:
 
-    ```{.r #whatever width=9 height=6 caption="R generated output"}
-                                  
-    y <- c(1,4,9,13,10)     
-    x <- c(1,2,3,4, 5 )
-    xx <- seq(1, 5, length.out=250)
-           
-    plot(x, y)
+```{.r #whatever width=9 height=6 caption="R generated output"}
+y <- c(1,4,9,13,10)
+x <- c(1,2,3,4, 5 )
+xx <- seq(1, 5, length.out=250)
 
-    fit <- lm(y~x)
-    label1 <- bquote(italic(R)^2 == .(format(summary(fit)$adj.r.squared, digits=4)))
-    lines(xx, predict(fit, data.frame(x=xx)))
-    fnc1 <- bquote(y == .(coef(fit)[[2]]) * x + .(coef(fit)[[1]]))
+plot(x, y)
 
-             
-    fit <- lm(y~poly(x,3, raw = TRUE))
-    label2 <- bquote(italic(R)^2 == .(format(summary(fit)$adj.r.squared, digits=4)))
-    lines(xx, predict(fit, data.frame(x=xx)))
-    fnc2 <- bquote(y == .(coef(fit)[[4]]) * x^3 + .(coef(fit)[[3]]) * x^2 + .(coef(fit)[[2]]) * x + .  (coef(fit)[[1]]))
+fit <- lm(y~x)
+label1 <- bquote(italic(R)^2 == .(format(summary(fit)$adj.r.squared, digits=4)))
+lines(xx, predict(fit, data.frame(x=xx)))
+fnc1 <- bquote(y == .(coef(fit)[[2]]) * x + .(coef(fit)[[1]]))
 
-    labels <- c(label1, fnc1, label2, fnc2)
-    legend("topleft", bty="n", legend=as.expression(labels))
-    ```
+fit <- lm(y~poly(x,3, raw = TRUE))
+label2 <- bquote(italic(R)^2 == .(format(summary(fit)$adj.r.squared, digits=4)))
+lines(xx, predict(fit, data.frame(x=xx)))
+fnc2 <- bquote(y == .(coef(fit)[[4]]) * x^3 + .(coef(fit)[[3]]) * x^2 + .(coef(fit)[[2]]) * x + .  (coef(fit)[[1]]))
+
+labels <- c(label1, fnc1, label2, fnc2)
+legend("topleft", bty="n", legend=as.expression(labels))
+```
 
 ![](.dot/6c2661f7c930d1580fd1a937d73fdf4a98ff3bb6.png)
 
@@ -205,15 +203,15 @@ This *R* code is shown as the following picture in the preview window:
 
 This *PlantUML* code as the following picture in the preview window:
 
-    ```plantuml
-    @startuml
-    Alice -> Bob: Authentication Request
-    Bob --> Alice: Authentication Response
+```plantuml
+@startuml
+Alice -> Bob: Authentication Request
+Bob --> Alice: Authentication Response
 
-    Alice -> Bob: Another authentication Request
-    Alice <-- Bob: another authentication Response
-    @enduml
-    ```
+Alice -> Bob: Another authentication Request
+Alice <-- Bob: another authentication Response
+@enduml
+```
 
 ![](.dot/dba2905531256f9ebf116f41123f91f40a6e51e9.png)
 
@@ -221,31 +219,42 @@ This *PlantUML* code as the following picture in the preview window:
 
 This *Ditaa* code is shown as the following picture in the preview window:
 
-    ```ditaa
-    +--------+   +-------+    +-------+
-    |        | --+ ditaa +--> |       | 
-    |  Text  |   +-------+    |diagram|
-    |Document|   |!magic!|    |       |
-    |     {d}|   |       |    |       |
-    +---+----+   +-------+    +-------+
-        :                         ^
-        |       Lots of work      |
-        +-------------------------+
-    ```
+```ditaa
++--------+   +-------+    +-------+
+|        | --+ ditaa +--> |       | 
+|  Text  |   +-------+    |diagram|
+|Document|   |!magic!|    |       |
+|     {d}|   |       |    |       |
++---+----+   +-------+    +-------+
+    :                         ^
+    |       Lots of work      |
+    +-------------------------+
+```
 
 ![](.dot/ae322a2246aab824d3548bbdce54194d469ac5a4.png)
 
 ### Pikchr
 
-    ``` pikchr
-    arrow right 200% "Markdown" "Source"
-    box rad 10px "Markdown" "Formatter" "(markdown.c)" fit
-    arrow right 200% "HTML+SVG" "Output"
-    arrow <-> down 70% from last box.s
-    box same "Pikchr" "Formatter" "(pikchr.c)" fit
-    ```
+```pikchr
+arrow right 200% "Markdown" "Source"
+box rad 10px "Markdown" "Formatter" "(markdown.c)" fit
+arrow right 200% "HTML+SVG" "Output"
+arrow <-> down 70% from last box.s
+box same "Pikchr" "Formatter" "(pikchr.c)" fit
+```
 
 ![](.dot/3e35bd41050bc18274dc4012895f3eeed27c20ee.svg)
+
+### Mermaid
+
+```mermaid
+pie title Pets adopted
+    "Dogs":123
+    "Cats":43
+    "Rats":12
+```
+
+![](.dot/3777164d4f11b711b394133b31c14127b8e1b254.svg)
 
 ## Installation
 
@@ -271,6 +280,8 @@ Place your VIM on one side of your screen and when `epiphany` appears, move it t
  - python3 [pandocfilters](https://github.com/jgm/pandocfilters)
  - [Epiphany](https://wiki.gnome.org/Apps/Web)
 
+### Optional dependencies
+
  - [graphviz](http://www.graphviz.org)
  - [blockdiag](http://blockdiag.com/en/blockdiag/index.html)
  - [seqdiag](http://blockdiag.com/en/seqdiag/index.html)
@@ -280,3 +291,5 @@ Place your VIM on one side of your screen and when `epiphany` appears, move it t
  - [PlantUML](https://github.com/plantuml/plantuml)
  - [Ditaa](https://github.com/stathissideris/ditaa.git)
  - [pikchr](https://pikchr.org/home/doc/trunk/homepage.md)
+ - [memraid-cli](https://github.com/mermaid-js/mermaid-cli)
+

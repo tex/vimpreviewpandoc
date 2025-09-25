@@ -48,6 +48,7 @@ function! s:pandoc_argv()
                 \ '-s',
                 \ '--ascii',
                 \ '--lua-filter='.s:path.'/pandoc/pikchr.lua',
+                \ '--lua-filter='.s:path.'/pandoc/mermaid.lua',
                 \ '--filter='.s:path.'/pandoc/graphviz.py',
                 \ '--filter='.s:path.'/pandoc/blockdiag.py',
                 \ '--filter='.s:path.'/pandoc/R.py',
